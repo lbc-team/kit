@@ -20,3 +20,12 @@
    ```
    pip install -r requirements.txt
    ```
+
+## 运行
+
+在 myenv 环境下 执行 
+
+```
+python trans.py
+```
+
