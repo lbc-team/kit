@@ -1,6 +1,7 @@
 # deps
 __pycache__
 .env
+myenv/
 
 
 # generated content
