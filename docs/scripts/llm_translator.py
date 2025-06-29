@@ -18,7 +18,7 @@ TRANSLATE_PROMPT = """
 2. 遇到 Rust、Solana、Anchor、JavaScript、SDK、Kit 等专业术语时，保留英文原文
 3. 翻译后的内容必须保持原文的结构，包括标题、段落、列表、表格、空行等和原文一致
 4. 代码块处理规则：
-   - 只翻译代码注释，代码本身保持不变
+   - 只翻译代码注释，代码本身保持不变，翻译时注意不要有重复的代码及注释
    - 所有的 json 代码，保持原文不变
    - 所有的 HTML 标记代码， 如 <Tabs> <Tab> <Callout>，保持原文不变
    - 保持代码块的语言标记，如 ```rust、```typescript、```javascript
