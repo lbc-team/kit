@@ -1,19 +1,19 @@
 ---
-title: Set up your project
-description: Set up the environment and prepare a personalised client object
+title: 设置你的项目
+description: 设置环境并准备一个个性化的客户端对象
 ---
 
-## Install dependencies
+## 安装依赖
 
-First things first, set up a new TypeScript project with a `src/index.ts` file and install the `@solana/kit` library. Additionally, to keep this tutorial focused on the Kit library, we'll use `tsx` to compile and run our TypeScript code.
+首先，使用 `src/index.ts` 文件设置一个新的 TypeScript 项目，并安装 `@solana/kit` 库。此外，为了使本教程专注于 Kit 库，我们将使用 `tsx` 来编译和运行我们的 TypeScript 代码。
 
 ```package-install
 @solana/kit tsx
 ```
 
-## Add some scripts
+## 添加一些脚本
 
-Let's also create a `start` script that runs `tsx src/index.ts` and a `validator` script to start a local Solana validator. Your `package.json` should look something like this:
+让我们也创建一个运行 `tsx src/index.ts` 的 `start` 脚本和一个启动本地 Solana 验证器的 `validator` 脚本。你的 `package.json` 应该如下所示：
 
 ```json
 {
@@ -30,15 +30,15 @@ Let's also create a `start` script that runs `tsx src/index.ts` and a `validator
 }
 ```
 
-From now on, we just need to make sure a Solana validator is running using the `validator` script before we can run our `start` script.
+从现在开始，我们只需要确保在使用 `start` 脚本之前，使用 `validator` 脚本运行一个 Solana 验证器。
 
-## Create a client object
+## 创建一个客户端对象
 
-To simplify our development, we'll create a small `Client` type specific to our application. Meaning it will include all the necessary objects and functions we need to interact with Solana.
+为了简化我们的开发，我们将创建一个特定于我们应用程序的小型 `Client` 类型。这意味着它将包含与 Solana 交互所需的所有必要对象和函数。
 
-The first two things we need are the RPC and RPC Subscriptions objects which allow us to send requests to the network and listen for network events respectively. We'll need both of them to fetch accounts and send transactions.
+我们需要的首先两件事是 RPC 和 RPC Subscriptions 对象，它们允许我们向网络发送请求并分别监听网络事件。我们需要它们来获取账户和发送交易。
 
-Let's create a new `src/client.ts` file and add the following `Client` type:
+让我们创建一个新的 `src/client.ts` 文件并添加以下 `Client` 类型：
 
 ```ts twoslash
 import { Rpc, RpcSubscriptions, SolanaRpcApi, SolanaRpcSubscriptionsApi } from "@solana/kit";
@@ -49,7 +49,7 @@ export type Client = {
 };
 ```
 
-Then, let's create a helper function to create a new cached `Client` object that we can use throughout our application:
+然后，让我们创建一个辅助函数来创建一个新的缓存 `Client` 对象，我们可以在整个应用程序中使用它：
 
 ```ts twoslash
 import { Rpc, RpcSubscriptions, SolanaRpcApi, SolanaRpcSubscriptionsApi } from "@solana/kit";
@@ -73,14 +73,14 @@ export function createClient(): Client {
 }
 ```
 
-We'll add more to this `Client` type as we progress through the tutorial but for now, this is all we need to get started.
+随着我们教程的进行，我们将向这个 `Client` 类型添加更多内容，但目前，这就是我们开始所需要的一切。
 
-## Run the tutorial
+## 运行本教程
 
-Finally, let's go back to our `src/index.ts` file and add an asynchronous `tutorial` function that we will run immediately to start our tutorial.
-For now, let's just use our `Client` object to fetch the balance of a specific account.
+最后，让我们回到我们的 `src/index.ts` 文件并添加一个异步 `tutorial` 函数，我们将立即运行它来启动我们的教程。
+现在，让我们只使用我们的 `Client` 对象来获取特定账户的余额。
 
-We can do this by creating an `Address` type via the `address` helper and fetching the balance via the `getBalance` method of the `rpc` object.
+我们可以通过 `address` 辅助函数创建一个 `Address` 类型，并通过 `rpc` 对象的 `getBalance` 方法获取余额来做到这一点。
 
 ```ts twoslash
 // @filename: client.ts
@@ -97,7 +97,7 @@ export function createClient(): Client {
 import { address } from "@solana/kit";
 import { createClient } from "./client";
 
-// Run the tutorial.
+// 运行本教程。
 tutorial();
 
 async function tutorial() {
@@ -108,10 +108,10 @@ async function tutorial() {
 }
 ```
 
-You should now see something like this when you run the `start` script:
+现在，当你运行 `start` 脚本时，你应该会看到如下内容：
 
 ```
 Balance: 1141440 lamports.
 ```
 
-In the next article, we'll learn how to generate a wallet that can spend lamports and sign transactions.
+在下一篇文章中，我们将学习如何生成一个可以花费 lamports 和签署交易的钱包。

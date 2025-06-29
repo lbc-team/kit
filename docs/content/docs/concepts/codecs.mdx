@@ -1,46 +1,46 @@
 ---
-title: Codecs
-description: Encode and decode anything
+title: 编解码器
+description: 编码和解码任何内容
 ---
 
-## Introduction
+## 简介
 
-Kit includes a powerful serialisation system called Codecs. Whether you're working with account data, instruction arguments, or custom binary layouts, Codecs give you the tools to transform structured data into bytes — and back again.
+工具包包含一个强大的序列化系统，称为编解码器。无论您是处理帐户数据、指令参数还是自定义二进制布局，编解码器都为您提供将结构化数据转换为字节以及反向转换的工具。
 
-Codecs are composable, type-safe, and environment-agnostic. They are designed to provide a flexible and consistent foundation for handling binary data across the Solana stack.
+编解码器是可组合的、类型安全的且与环境无关的。它们旨在为跨 Solana 堆栈处理二进制数据提供灵活且一致的基础。
 
-## Installation
+## 安装
 
-Codecs are **included within the `@solana/kit` library** but you may also install them using their standalone package.
+编解码器**包含在 `@solana/kit` 库中**，但您也可以使用其独立包安装它们。
 
 ```package-install
 @solana/codecs
 ```
 
-Note that the `@solana/codecs` package itself is composed of several smaller packages, each providing a different set of codec helpers. Here's the list of all packages containing codecs, should you need to install them individually:
+请注意，`@solana/codecs` 包本身由几个较小的包组成，每个包都提供一组不同的编解码器助手。以下是包含编解码器的所有包的列表，如果您需要单独安装它们：
 
-| Package                                                                                          | Description                                                                        |
-| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| [`@solana/kit`](https://www.npmjs.com/package/@solana/kit)                                       | Includes `@solana/codecs`.                                                         |
-| [`@solana/codecs`](https://www.npmjs.com/package/@solana/codecs)                                 | Includes all codecs packages below.                                                |
-| [`@solana/codecs-core`](https://www.npmjs.com/package/@solana/codecs-core)                       | Core types and utilities for building codecs.                                      |
-| [`@solana/codecs-numbers`](https://www.npmjs.com/package/@solana/codecs-numbers)                 | Codecs for numbers of various sizes and characteristics.                           |
-| [`@solana/codecs-strings`](https://www.npmjs.com/package/@solana/codecs-strings)                 | Codecs for strings of various encodings and size strategies.                       |
-| [`@solana/codecs-data-structures`](https://www.npmjs.com/package/@solana/codecs-data-structures) | Codecs for a variety of data structures such as objects, enums, arrays, maps, etc. |
-| [`@solana/options`](https://www.npmjs.com/package/@solana/options)                               | Codecs for Rust-like `Options` in JavaScript.                                      |
+| 包                                                                                       | 描述                                                                       |
+| ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [`@solana/kit`](https://www.npmjs.com/package/@solana/kit)                               | 包含 `@solana/codecs`。                                                          |
+| [`@solana/codecs`](https://www.npmjs.com/package/@solana/codecs)                         | 包含以下所有编解码器包。                                                              |
+| [`@solana/codecs-core`](https://www.npmjs.com/package/@solana/codecs-core)              | 用于构建编解码器的核心类型和实用程序。                                                        |
+| [`@solana/codecs-numbers`](https://www.npmjs.com/package/@solana/codecs-numbers)          | 用于各种大小和特征的数字的编解码器。                                                          |
+| [`@solana/codecs-strings`](https://www.npmjs.com/package/@solana/codecs-strings)          | 用于各种编码和大小策略的字符串的编解码器。                                                          |
+| [`@solana/codecs-data-structures`](https://www.npmjs.com/package/@solana/codecs-data-structures) | 用于各种数据结构的编解码器，例如对象、枚举、数组、映射等。                                                   |
+| [`@solana/options`](https://www.npmjs.com/package/@solana/options)                       | 用于 JavaScript 中类似 Rust 的 `Options` 的编解码器。                                                      |
 
-## What is a Codec?
+## 什么是编解码器？
 
-A Codec is an object that knows how to encode a any type into a `Uint8Array` and how to decode a `Uint8Array` back into that value.
+编解码器是一个对象，它知道如何将任何类型编码为 `Uint8Array`，以及如何将 `Uint8Array` 解码回该值。
 
-No matter which serialization strategy we use, Codecs abstract away its implementation and offer a simple encode and decode interface. They are also highly composable, allowing us to build complex data structures from simple building blocks.
+无论我们使用哪种序列化策略，编解码器都会抽象其实现并提供一个简单的编码和解码接口。它们也是高度可组合的，允许我们从简单的构建块构建复杂的数据结构。
 
-Here's a quick example that encodes and decodes a simple `Person` type.
+这是一个快速示例，用于编码和解码一个简单的 `Person` 类型。
 
 ```ts twoslash
 import { Codec, addCodecSizePrefix, getUtf8Codec, getU32Codec, getStructCodec, ReadonlyUint8Array } from "@solana/kit";
 // ---cut-before---
-// Use composable codecs to build complex data structures.
+// 使用可组合的编解码器来构建复杂的数据结构。
 type Person = { name: string; age: number };
 const getPersonCodec = (): Codec<Person> =>
   getStructCodec([
@@ -48,25 +48,25 @@ const getPersonCodec = (): Codec<Person> =>
     ["age", getU32Codec()],
   ]);
 
-// Use your own codecs to encode and decode data.
+// 使用您自己的编解码器来编码和解码数据。
 const personCodec = getPersonCodec();
 const encodedPerson = personCodec.encode({ name: "John", age: 42 });
 const decodedPerson = personCodec.decode(encodedPerson);
 ```
 
-## Composing codecs
+## 组合编解码器
 
-The easiest way to create your own codecs is to compose the [various codecs](#available-codecs) at your disposal.
+创建您自己的编解码器的最简单方法是组合您可用的[各种编解码器](#available-codecs)。
 
-For instance, consider the following codecs available:
+例如，考虑以下可用的编解码器：
 
-- `getStructCodec`: Creates a codec for objects with named fields.
-- `getU32Codec`: Creates a codec for unsigned 32-bit integers.
-- `getUtf8Codec`: Creates a codec for UTF-8 strings.
-- `addCodecSizePrefix`: Creates a codec that prefixes the encoded data with its length.
-- `getBooleanCodec`: Creates a codec for booleans using a single byte.
+- `getStructCodec`：为具有命名字段的对象创建编解码器。
+- `getU32Codec`：为无符号 32 位整数创建编解码器。
+- `getUtf8Codec`：为 UTF-8 字符串创建编解码器。
+- `addCodecSizePrefix`：创建一个编解码器，该编解码器使用其长度作为编码数据的前缀。
+- `getBooleanCodec`：使用单个字节为布尔值创建编解码器。
 
-By combining them together we can create a custom codec for the following `Person` type.
+通过将它们组合在一起，我们可以为以下 `Person` 类型创建一个自定义编解码器。
 
 ```ts twoslash
 import { Codec, addCodecSizePrefix, getUtf8Codec, getU32Codec, getStructCodec, getBooleanCodec } from "@solana/kit";
@@ -85,7 +85,7 @@ const getPersonCodec = (): Codec<Person> =>
   ]);
 ```
 
-This function returns a `Codec` object which contains both an `encode` and `decode` function that can be used to convert a `Person` type to and from a `Uint8Array`.
+此函数返回一个 `Codec` 对象，其中包含一个 `encode` 和 `decode` 函数，可用于将 `Person` 类型转换为和从 `Uint8Array` 类型转换。
 
 ```ts twoslash
 import { Codec, addCodecSizePrefix, getUtf8Codec, getU32Codec, getStructCodec, getBooleanCodec } from "@solana/kit";
@@ -102,11 +102,11 @@ const bytes = personCodec.encode({ name: "John", age: 42, verified: true });
 const person = personCodec.decode(bytes);
 ```
 
-There is a significant library of composable codecs at your disposal, enabling you to compose complex types. Check out the [available codecs](#available-codecs) section for more information. If you need a custom codec that cannot be composed from existing ones, you can always create your own as we will see in the ["Creating custom codecs"](#creating-custom-codecs) section below.
+您可以使用大量的可组合编解码器库，使您能够组合复杂的类型。查看[可用编解码器](#available-codecs)部分以获取更多信息。如果您需要无法从现有编解码器组合的自定义编解码器，您可以随时创建自己的编解码器，正如我们将在下面的[“创建自定义编解码器”](#creating-custom-codecs)部分中看到的那样。
 
-## Separate encoders and decoders
+## 分离编码器和解码器
 
-Whilst Codecs can both encode and decode, it is possible to only focus on encoding or decoding data, enabling the unused logic to be tree-shaken. For instance, here's our previous example using Encoders only to encode a `Person` type.
+虽然编解码器可以同时编码和解码，但可以仅专注于编码或解码数据，从而使未使用的逻辑可以进行树摇。例如，这是我们之前仅使用编码器来编码 `Person` 类型的示例。
 
 ```ts twoslash
 import {
@@ -129,7 +129,7 @@ const getPersonEncoder = (): Encoder<Person> =>
 const bytes = getPersonEncoder().encode({ name: "John", age: 42, verified: true });
 ```
 
-The same can be done for decoding the `Person` type by using Decoders like so.
+对于解码 `Person` 类型，也可以通过使用解码器来实现，如下所示。
 
 ```ts twoslash
 import {
@@ -153,11 +153,11 @@ const getPersonDecoder = (): Decoder<Person> =>
 const person = getPersonDecoder().decode(bytes);
 ```
 
-## Combining encoders and decoders
+## 组合编码器和解码器
 
-Separating Codecs into Encoders and Decoders is particularly good practice for library maintainers as it allows their users to tree-shake any of the encoders and/or decoders they don't need. However, we may still want to offer a codec helper for users who need both for convenience.
+将编解码器分离为编码器和解码器对于库维护者来说尤其是一种好的做法，因为它允许他们的用户树摇他们不需要的任何编码器和/或解码器。但是，我们可能仍然希望为需要两者的用户提供一个方便的编解码器助手。
 
-That's why this library offers a `combineCodec` helper that creates a `Codec` instance from a matching `Encoder` and `Decoder`.
+这就是为什么此库提供了一个 `combineCodec` 助手，用于从匹配的 `Encoder` 和 `Decoder` 创建一个 `Codec` 实例。
 
 ```ts twoslash
 import { Codec, Encoder, Decoder, combineCodec } from "@solana/kit";
@@ -168,7 +168,7 @@ const getPersonDecoder = null as unknown as () => Decoder<Person>;
 const getPersonCodec = (): Codec<Person> => combineCodec(getPersonEncoder(), getPersonDecoder());
 ```
 
-This means library maintainers can offer Encoders, Decoders and Codecs for all their types whilst staying efficient and tree-shakeable. In summary, we recommend the following pattern when creating codecs for library types.
+这意味着库维护者可以为他们的所有类型提供编码器、解码器和编解码器，同时保持高效且可树摇。总之，我们建议在为库类型创建编解码器时采用以下模式。
 
 ```ts
 type MyType = /* ... */;
@@ -180,9 +180,9 @@ const getMyTypeCodec = (): Codec<MyType> => combineCodec(
 );
 ```
 
-## Different `From` and `To` types
+## 不同的 `From` 和 `To` 类型
 
-When creating codecs, the encoded type is allowed to be looser than the decoded type. A good example of that is the u64 number codec:
+在创建编解码器时，允许编码类型比解码类型更宽松。一个很好的例子是 u64 数字编解码器：
 
 ```ts twoslash
 import { Codec, getU64Codec } from "@solana/kit";
@@ -190,7 +190,7 @@ import { Codec, getU64Codec } from "@solana/kit";
 const u64Codec: Codec<number | bigint, bigint> = getU64Codec();
 ```
 
-As you can see, the first type parameter is looser since it accepts numbers or big integers, whereas the second type parameter only accepts big integers. That's because when _encoding_ a u64 number, you may provide either a `bigint` or a `number` for convenience. However, when you decode a u64 number, you will always get a `bigint` because not all u64 values can fit in a JavaScript `number` type.
+正如您所看到的，第一个类型参数更宽松，因为它接受数字或大整数，而第二个类型参数仅接受大整数。这是因为在 _编码_ u64 数字时，您可以为了方便而提供 `bigint` 或 `number`。但是，当您解码 u64 数字时，您将始终获得一个 `bigint`，因为并非所有 u64 值都可以容纳在 JavaScript `number` 类型中。
 
 ```ts twoslash
 import { getU64Codec } from "@solana/kit";
@@ -200,9 +200,9 @@ const bytes = u64Codec.encode(42);
 const value = u64Codec.decode(bytes); // BigInt(42)
 ```
 
-This relationship between the type we encode “From” and decode “To” can be generalized in TypeScript as `To extends From`.
+我们编码的类型“From”和解码的类型“To”之间的这种关系可以在 TypeScript 中概括为 `To extends From`。
 
-Here's another example using an object with default values. You can read more about the [transformCodec](#transform-codec) helper below.
+这是另一个使用具有默认值的对象的示例。您可以在下面阅读有关 [transformCodec](#transform-codec) 助手的更多信息。
 
 ```ts twoslash
 import {
@@ -242,11 +242,11 @@ const getPersonDecoder = (): Decoder<Person> =>
 const getPersonCodec = (): Codec<PersonInput, Person> => combineCodec(getPersonEncoder(), getPersonDecoder());
 ```
 
-## Fixed-size and variable-size codecs
+## 固定大小和可变大小的编解码器
 
-It is also worth noting that Codecs can either be of fixed size or variable size.
+还值得注意的是，编解码器可以是固定大小或可变大小的。
 
-`FixedSizeCodecs` have a `fixedSize` number attribute that tells us exactly how big their encoded data is in bytes.
+`FixedSizeCodecs` 具有一个 `fixedSize` 数字属性，该属性告诉我们其编码数据的大小（以字节为单位）。
 
 ```ts twoslash
 import { FixedSizeCodec, getU32Codec } from "@solana/kit";
@@ -256,7 +256,7 @@ myCodec satisfies FixedSizeCodec<number>;
 myCodec.fixedSize; // 4 bytes.
 ```
 
-On the other hand, `VariableSizeCodecs` do not know the size of their encoded data in advance. Instead, they will grab that information either from the provided encoded data or from the value to encode. For the former, we can simply access the length of the `Uint8Array`. For the latter, it provides a `getSizeFromValue` that tells us the encoded byte size of the provided value.
+另一方面，`VariableSizeCodecs` 不知道其编码数据的大小。相反，它们将从提供的编码数据或要编码的值中获取该信息。对于前者，我们可以简单地访问 `Uint8Array` 的长度。对于后者，它提供了一个 `getSizeFromValue`，该函数告诉我们提供的值的编码字节大小。
 
 ```ts twoslash
 import { VariableSizeCodec, getUtf8Codec, getU32Codec, addCodecSizePrefix } from "@solana/kit";
@@ -266,25 +266,25 @@ myCodec satisfies VariableSizeCodec<string>;
 myCodec.getSizeFromValue("hello world"); // 4 + 11 bytes.
 ```
 
-Also note that, if the `VariableSizeCodec` is bounded by a maximum size, it can be provided as a `maxSize` number attribute.
+另请注意，如果 `VariableSizeCodec` 受最大大小限制，则可以将其作为 `maxSize` 数字属性提供。
 
-The following type guards are available to identify and/or assert the size of codecs: `isFixedSize`, `isVariableSize`, `assertIsFixedSize` and `assertIsVariableSize`.
+以下类型保护可用于标识和/或断言编解码器的大小：`isFixedSize`、`isVariableSize`、`assertIsFixedSize` 和 `assertIsVariableSize`。
 
-Finally, note that the same is true for `Encoders` and `Decoders`.
+最后，请注意，对于 `Encoders` 和 `Decoders` 也是如此。
 
-- A `FixedSizeEncoder` has a `fixedSize` number attribute.
-- A `VariableSizeEncoder` has a `getSizeFromValue` function and an optional `maxSize` number attribute.
-- A `FixedSizeDecoder` has a `fixedSize` number attribute.
-- A `VariableSizeDecoder` has an optional `maxSize` number attribute.
+- `FixedSizeEncoder` 具有一个 `fixedSize` 数字属性。
+- `VariableSizeEncoder` 具有一个 `getSizeFromValue` 函数和一个可选的 `maxSize` 数字属性。
+- `FixedSizeDecoder` 具有一个 `fixedSize` 数字属性。
+- `VariableSizeDecoder` 具有一个可选的 `maxSize` 数字属性。
 
-## Creating custom codecs
+## 创建自定义编解码器
 
-If composing codecs isn't enough for you, you may implement your own codec logic by using the `createCodec` function. This function requires an object with a `read` and a `write` function telling us how to read from and write to an existing byte array.
+如果组合编解码器对您来说还不够，您可以使用 `createCodec` 函数来实现您自己的编解码器逻辑。此函数需要一个带有 `read` 和 `write` 函数的对象，该对象告诉我们如何从现有字节数组读取和写入。
 
-The `read` function accepts the `bytes` to decode from and the `offset` at each we should start reading. It returns an array with two items:
+`read` 函数接受要从中解码的 `bytes` 和我们应该开始读取的每个 `offset`。它返回一个包含两个项目的数组：
 
-- The first item should be the decoded value.
-- The second item should be the next offset to read from.
+- 第一个项目应该是解码后的值。
+- 第二个项目应该是下一个要读取的偏移量。
 
 ```ts twoslash
 import { createCodec, Offset } from "@solana/kit";
@@ -301,7 +301,7 @@ createCodec({
 });
 ```
 
-Reciprocally, the `write` function accepts the `value` to encode, the array of `bytes` to write the encoded value to and the `offset` at which it should be written. It should encode the given value, insert it in the byte array, and provide the next offset to write to as the return value.
+相应地，`write` 函数接受要编码的 `value`，要将编码值写入的 `bytes` 数组以及应该写入的 `offset`。它应该对给定的值进行编码，将其插入到字节数组中，并提供下一个要写入的偏移量作为返回值。
 
 ```ts twoslash
 import { createCodec } from "@solana/kit";
@@ -318,7 +318,7 @@ createCodec({
 });
 ```
 
-Additionally, we must specify the size of the codec. If we are defining a `FixedSizeCodec`, we must simply provide the `fixedSize` number attribute. For `VariableSizeCodecs`, we must provide the `getSizeFromValue` function as described in the previous section.
+此外，我们必须指定编解码器的大小。如果我们定义的是 `FixedSizeCodec`，我们必须简单地提供 `fixedSize` 数字属性。对于 `VariableSizeCodecs`，我们必须提供 `getSizeFromValue` 函数，如上一节所述。
 
 ```ts twoslash
 import { createCodec } from "@solana/kit";
@@ -341,7 +341,7 @@ createCodec({
 });
 ```
 
-Here's a concrete example of a custom codec that encodes any unsigned integer in a single byte. Since a single byte can only store integers from 0 to 255, if any other integer is provided it will take its modulo 256 to ensure it fits in a single byte. Because it always requires a single byte, that codec is a `FixedSizeCodec` of size `1`.
+这是一个自定义编解码器的具体示例，该编解码器将任何无符号整数编码为单个字节。由于单个字节只能存储从 0 到 255 的整数，因此如果提供任何其他整数，它将取其模 256 以确保它可以容纳在单个字节中。因为它始终需要单个字节，所以该编解码器是大小为“1”的 `FixedSizeCodec`。
 
 ```ts twoslash
 import { createCodec } from "@solana/kit";
@@ -360,11 +360,11 @@ const getModuloU8Codec = () =>
   });
 ```
 
-Note that, it is also possible to create custom encoders and decoders separately by using the `createEncoder` and `createDecoder` functions respectively and then use the `combineCodec` function on them just like we were doing with composed codecs.
+请注意，也可以分别使用 `createEncoder` 和 `createDecoder` 函数来单独创建自定义编码器和解码器，然后像我们使用组合编解码器一样对它们使用 `combineCodec` 函数。
 
-This approach is recommended to library maintainers as it allows their users to tree-shake any of the encoders and/or decoders they don't need.
+建议库维护者采用这种方法，因为它允许他们的用户树摇他们不需要的任何编码器和/或解码器。
 
-Here's our previous modulo u8 example but split into separate `Encoder`, `Decoder` and `Codec` instances.
+这是我们之前的 modulo u8 示例，但已拆分为单独的 `Encoder`、`Decoder` 和 `Codec` 实例。
 
 ```ts twoslash
 import { createEncoder, createDecoder, combineCodec } from "@solana/kit";
@@ -390,7 +390,7 @@ const getModuloU8Decoder = () =>
 const getModuloU8Codec = () => combineCodec(getModuloU8Encoder(), getModuloU8Decoder());
 ```
 
-Here's another example returning a `VariableSizeCodec`. This one transforms a simple string composed of characters from `a` to `z` to a buffer of numbers from `1` to `26` where `0` bytes are spaces.
+这是另一个返回 `VariableSizeCodec` 的示例。此示例将由 `a` 到 `z` 的字符组成的简单字符串转换为从 `1` 到 `26` 的数字缓冲区，其中 `0` 字节是空格。
 
 ```ts twoslash
 import { createEncoder, createDecoder, combineCodec } from "@solana/kit";
@@ -418,9 +418,9 @@ const getCipherDecoder = () =>
 const getCipherCodec = () => combineCodec(getCipherEncoder(), getCipherDecoder());
 ```
 
-## Available codecs
+## 可用编解码器
 
-### Core utilities
+### 核心实用程序
 
 <div className="*:columns-5xs *:gap-8">
 
@@ -440,7 +440,7 @@ const getCipherCodec = () => combineCodec(getCipherEncoder(), getCipherDecoder()
 
 </div>
 
-### Numbers
+### 数字
 
 <div className="*:columns-5xs *:gap-8">
 
@@ -460,7 +460,7 @@ const getCipherCodec = () => combineCodec(getCipherEncoder(), getCipherDecoder()
 
 </div>
 
-### Strings
+### 字符串
 
 <div className="*:columns-5xs *:gap-8">
 
@@ -474,7 +474,7 @@ const getCipherCodec = () => combineCodec(getCipherEncoder(), getCipherDecoder()
 
 </div>
 
-### Data structures
+### 数据结构
 
 <div className="*:columns-5xs *:gap-8">
 
@@ -499,11 +499,11 @@ const getCipherCodec = () => combineCodec(getCipherEncoder(), getCipherDecoder()
 
 </div>
 
-## Core utilities listing [!toc]
+## 核心实用程序列表 [!toc]
 
 ### addCodecSentinel [!toc] [#add-codec-sentinel]
 
-One way of delimiting the size of a codec is to use sentinels. The `addCodecSentinel` function allows us to add a sentinel to the end of the encoded data and to read until that sentinel is found when decoding. It accepts any codec and a `Uint8Array` sentinel responsible for delimiting the encoded data.
+限制编解码器大小的一种方法是使用警戒值。`addCodecSentinel` 函数允许我们在编码数据的末尾添加一个警戒值，并在解码时读取直到找到该警戒值。它接受任何编解码器和负责限制编码数据的 `Uint8Array` 警戒值。
 
 ```ts twoslash
 import { addCodecSentinel, getUtf8Codec } from "@solana/kit";
@@ -511,11 +511,11 @@ import { addCodecSentinel, getUtf8Codec } from "@solana/kit";
 const codec = addCodecSentinel(getUtf8Codec(), new Uint8Array([255, 255]));
 codec.encode("hello");
 // 0x68656c6c6fffff
-//   |        └-- Our sentinel.
-//   └-- Our encoded string.
+//   |        └-- 我们的警戒值。
+//   └-- 我们的编码字符串。
 ```
 
-Note that the sentinel _must not_ be present in the encoded data and _must_ be present in the decoded data for this to work. If this is not the case, dedicated errors will be thrown.
+请注意，警戒值_不得_存在于编码数据中，并且_必须_存在于解码数据中才能使其工作。如果不是这种情况，将抛出专用错误。
 
 ```ts twoslash
 import { addCodecSentinel, getUtf8Codec } from "@solana/kit";
@@ -523,11 +523,11 @@ import { addCodecSentinel, getUtf8Codec } from "@solana/kit";
 const sentinel = new Uint8Array([108, 108]); // 'll'
 const codec = addCodecSentinel(getUtf8Codec(), sentinel);
 
-codec.encode("hello"); // Throws: sentinel is in encoded data.
-codec.decode(new Uint8Array([1, 2, 3])); // Throws: sentinel missing in decoded data.
+codec.encode("hello"); // 抛出：警戒值存在于编码数据中。
+codec.decode(new Uint8Array([1, 2, 3])); // 抛出：解码数据中缺少警戒值。
 ```
 
-Separate `addEncoderSentinel` and `addDecoderSentinel` functions are also available.
+还提供单独的 `addEncoderSentinel` 和 `addDecoderSentinel` 函数。
 
 ```ts twoslash
 import { addEncoderSentinel, addDecoderSentinel, getUtf8Encoder, getUtf8Decoder } from "@solana/kit";
@@ -539,11 +539,11 @@ const value = addDecoderSentinel(getUtf8Decoder(), sentinel).decode(bytes);
 
 ### addCodecSizePrefix [!toc] [#add-codec-size-prefix]
 
-The `addCodecSizePrefix` function allows us to store the byte size of any codec as a number prefix, enabling us to contain variable-size codecs to their actual size.
+`addCodecSizePrefix` 函数允许我们将任何编解码器的字节大小存储为数字前缀，从而使我们能够将可变大小的编解码器限制为其实际大小。
 
-When encoding, the size of the encoded data is stored before the encoded data itself. When decoding, the size is read first to know how many bytes to read next.
+编码时，编码数据的大小存储在编码数据本身之前。解码时，首先读取大小以了解接下来要读取多少字节。
 
-For example, say we want to represent a variable-size base-58 string using a `u32` size prefix. Here's how we can use the `addCodecSizePrefix` function to achieve that.
+例如，假设我们想使用 `u32` 大小前缀来表示可变大小的 base-58 字符串。下面是如何使用 `addCodecSizePrefix` 函数来实现这一点。
 
 ```ts twoslash
 import { addCodecSizePrefix, getBase58Codec, getU32Codec } from "@solana/kit";
@@ -552,11 +552,11 @@ const getU32Base58Codec = () => addCodecSizePrefix(getBase58Codec(), getU32Codec
 
 getU32Base58Codec().encode("hello world");
 // 0x0b00000068656c6c6f20776f726c64
-//   |       └-- Our encoded base-58 string.
-//   └-- Our encoded u32 size prefix.
+//   |       └-- 我们的编码 base-58 字符串。
+//   └-- 我们的编码 u32 大小前缀。
 ```
 
-You may also use the `addEncoderSizePrefix` and `addDecoderSizePrefix` functions to separate your codec logic like so:
+您还可以使用 `addEncoderSizePrefix` 和 `addDecoderSizePrefix` 函数来分离您的编解码器逻辑，如下所示：
 
 ```ts twoslash
 import {
@@ -576,7 +576,7 @@ const getU32Base58Codec = () => combineCodec(getU32Base58Encoder(), getU32Base58
 
 ### containsBytes [!toc] [#contains-bytes]
 
-Checks if a `Uint8Array` contains another `Uint8Array` at a given offset.
+检查 `Uint8Array` 是否在给定偏移量处包含另一个 `Uint8Array`。
 
 ```ts twoslash
 import { containsBytes } from "@solana/kit";
@@ -587,7 +587,7 @@ containsBytes(new Uint8Array([1, 2, 3, 4]), new Uint8Array([2, 3]), 2); // false
 
 ### fixBytes [!toc] [#fix-bytes]
 
-Pads or truncates a `Uint8Array` so it has the specified length.
+填充或截断一个 `Uint8Array`，使其具有指定的长度。
 
 ```ts twoslash
 import { fixBytes } from "@solana/kit";
@@ -598,9 +598,9 @@ fixBytes(new Uint8Array([1, 2, 3, 4]), 2); // Uint8Array([1, 2])
 
 ### fixCodecSize [!toc] [#fix-codec-size]
 
-The `fixCodecSize` function allows us to bind the size of a given codec to the given fixed size.
+`fixCodecSize` 函数允许我们将给定编解码器的大小绑定到给定的固定大小。
 
-For instance, say we wanted to represent a base-58 string that uses exactly 32 bytes when decoded. Here's how we can use the `fixCodecSize` helper to achieve that.
+例如，假设我们想表示一个在解码时精确使用 32 字节的 base-58 字符串。下面是如何使用 `fixCodecSize` 助手来实现这一点。
 
 ```ts twoslash
 import { fixCodecSize, getBase58Codec } from "@solana/kit";
@@ -608,7 +608,7 @@ import { fixCodecSize, getBase58Codec } from "@solana/kit";
 const get32BytesBase58Codec = () => fixCodecSize(getBase58Codec(), 32);
 ```
 
-You may also use the `fixEncoderSize` and `fixDecoderSize` functions to separate your codec logic like so:
+您还可以使用 `fixEncoderSize` 和 `fixDecoderSize` 函数来分离您的编解码器逻辑，如下所示：
 
 ```ts twoslash
 import { fixEncoderSize, fixDecoderSize, getBase58Encoder, getBase58Decoder, combineCodec } from "@solana/kit";
@@ -620,7 +620,7 @@ const get32BytesBase58Codec = () => combineCodec(get32BytesBase58Encoder(), get3
 
 ### mergeBytes [!toc] [#merge-bytes]
 
-Concatenates an array of `Uint8Arrays` into a single `Uint8Array`.
+将 `Uint8Arrays` 数组连接到单个 `Uint8Array` 中。
 
 ```ts twoslash
 import { mergeBytes } from "@solana/kit";
@@ -634,9 +634,9 @@ const bytes = mergeBytes([bytes1, bytes2, bytes3]);
 
 ### offsetCodec [!toc] [#offset-codec]
 
-The `offsetCodec` function is a powerful codec primitive that allows us to move the offset of a given codec forward or backwards. It accepts one or two functions that takes the current offset and returns a new offset.
+`offsetCodec` 函数是一个强大的编解码器原语，允许我们将给定编解码器的偏移量向前或向后移动。它接受一个或两个函数，这些函数接受当前偏移量并返回一个新的偏移量。
 
-To understand how this works, let's take the following `biggerU32Codec` example which encodes a `u32` number inside an 8-byte buffer by using the [resizeCodec](#resize-codec) helper.
+为了理解这是如何工作的，让我们看下面的 `biggerU32Codec` 示例，该示例通过使用 [resizeCodec](#resize-codec) 助手将 `u32` 数字编码到 8 字节缓冲区中。
 
 ```ts twoslash
 import { resizeCodec, getU32Codec } from "@solana/kit";
@@ -644,11 +644,11 @@ import { resizeCodec, getU32Codec } from "@solana/kit";
 const biggerU32Codec = resizeCodec(getU32Codec(), (size) => size + 4);
 biggerU32Codec.encode(0xffffffff);
 // 0xffffffff00000000
-//   |       └-- Empty buffer space caused by the resizeCodec function.
-//   └-- Our encoded u32 number.
+//   |       └-- 由 resizeCodec 函数引起的空缓冲区空间。
+//   └-- 我们的编码 u32 数字。
 ```
 
-Now, let's say we want to move the offset of that codec 2 bytes forward so that the encoded number sits in the middle of the buffer. To achieve, this we can use the `offsetCodec` helper and provide a `preOffset` function that moves the "pre-offset" of the codec 2 bytes forward.
+现在，假设我们想将该编解码器的偏移量向前移动 2 个字节，以便编码数字位于缓冲区的中间。为了实现这一点，我们可以使用 `offsetCodec` 助手并提供一个 `preOffset` 函数，该函数向前移动编解码器的“pre-offset”2 个字节。
 
 ```ts twoslash
 import { offsetCodec, resizeCodec, getU32Codec } from "@solana/kit";
@@ -659,12 +659,12 @@ const u32InTheMiddleCodec = offsetCodec(biggerU32Codec, {
 });
 u32InTheMiddleCodec.encode(0xffffffff);
 // 0x0000ffffffff0000
-//       └-- Our encoded u32 number is now in the middle of the buffer.
+//       └-- 我们的编码 u32 数字现在位于缓冲区的中间。
 ```
 
-We refer to this offset as the "pre-offset" because, once the inner codec is encoded or decoded, an additional offset will be returned which we refer to as the "post-offset". That "post-offset" is important as, unless we are reaching the end of our codec, it will be used by any further codecs to continue encoding or decoding data.
+我们将此偏移量称为“pre-offset”，因为一旦内部编解码器被编码或解码，将返回一个附加的偏移量，我们将其称为“post-offset”。这个“post-offset”很重要，因为除非我们到达编解码器的末尾，否则它将被任何进一步的编解码器用于继续编码或解码数据。
 
-By default, that "post-offset" is simply the addition of the "pre-offset" and the size of the encoded or decoded inner data.
+默认情况下，该“post-offset”只是“pre-offset”和编码或解码的内部数据大小之和。
 
 ```ts twoslash
 import { offsetCodec, resizeCodec, getU32Codec } from "@solana/kit";
@@ -675,12 +675,12 @@ const u32InTheMiddleCodec = offsetCodec(biggerU32Codec, {
 });
 u32InTheMiddleCodec.encode(0xffffffff);
 // 0x0000ffffffff0000
-//   |   |       └-- Post-offset.
-//   |   └-- New pre-offset: The original pre-offset + 2.
-//   └-- Pre-offset: The original pre-offset before we adjusted it.
+//   |   |       └-- Post-offset。
+//   |   └-- 新的 pre-offset：原始 pre-offset + 2。
+//   └-- Pre-offset：我们在调整它之前的原始 pre-offset。
 ```
 
-However, you may also provide a `postOffset` function to adjust the "post-offset". For instance, let's push the "post-offset" 2 bytes forward as well such that any further codecs will start doing their job at the end of our 8-byte `u32` number.
+但是，您也可以提供一个 `postOffset` 函数来调整“post-offset”。例如，让我们也将“post-offset”向前推送 2 个字节，以便任何进一步的编解码器都将在我们的 8 字节 `u32` 数字的末尾开始执行其工作。
 
 ```ts twoslash
 import { offsetCodec, resizeCodec, getU32Codec } from "@solana/kit";
@@ -692,66 +692,19 @@ const u32InTheMiddleCodec = offsetCodec(biggerU32Codec, {
 });
 u32InTheMiddleCodec.encode(0xffffffff);
 // 0x0000ffffffff0000
-//   |   |       |   └-- New post-offset: The original post-offset + 2.
-//   |   |       └-- Post-offset: The original post-offset before we adjusted it.
-//   |   └-- New pre-offset: The original pre-offset + 2.
-//   └-- Pre-offset: The original pre-offset before we adjusted it.
+//   |   |       |   └-- 新的 post-offset：原始 post-offset + 2。
+//   |   |       └-- Post-offset：我们在调整它之前的原始 post-offset。
+//   |   └-- 新的 pre-offset：原始 pre-offset + 2。
+//   └-- Pre-offset：我们在调整它之前的原始 pre-offset。
 ```
 
-Both the `preOffset` and `postOffset` functions offer the following attributes:
+`preOffset` 和 `postOffset` 函数都提供以下属性：
 
-- `bytes`: The entire byte array being encoded or decoded.
-- `preOffset`: The original and unaltered pre-offset.
-- `wrapBytes`: A helper function that wraps the given offset around the byte array length. E.g. `wrapBytes(-1)` will refer to the last byte of the byte array.
+- `bytes`：正在编码或解码的整个字节数组。
+- `preOffset`：原始的和未经更改的 pre-offset。
+- `wrapBytes`：一个助手函数，用于将给定的偏移量围绕字节数组长度包装。例如，`wrapBytes(-1)` 将引用字节数组的最后一个字节。
 
-Additionally, the post-offset function also provides the following attributes:
-
-- `newPreOffset`: The new pre-offset after the pre-offset function has been applied.
-- `postOffset`: The original and unaltered post-offset.
-
-Note that you may also decide to ignore these attributes to achieve absolute offsets. However, relative offsets are usually recommended as they won't break your codecs when composed with other codecs.
-
-```ts twoslash
-import { offsetCodec, resizeCodec, getU32Codec } from "@solana/kit";
-const biggerU32Codec = resizeCodec(getU32Codec(), (size) => size + 4);
-// ---cut-before---
-const u32InTheMiddleCodec = offsetCodec(biggerU32Codec, {
-  preOffset: () => 2,
-  postOffset: () => 8,
-});
-u32InTheMiddleCodec.encode(0xffffffff);
-// 0x0000ffffffff0000
-```
-
-Also note that any negative offset or offset that exceeds the size of the byte array will throw a `SolanaError` of code `SOLANA_ERROR__CODECS__OFFSET_OUT_OF_RANGE`.
-
-```ts twoslash
-import { offsetCodec, resizeCodec, getU32Codec } from "@solana/kit";
-const biggerU32Codec = resizeCodec(getU32Codec(), (size) => size + 4);
-// ---cut-before---
-const u32InTheEndCodec = offsetCodec(biggerU32Codec, { preOffset: () => -4 });
-u32InTheEndCodec.encode(0xffffffff);
-// throws new SolanaError(SOLANA_ERROR__CODECS__OFFSET_OUT_OF_RANGE)
-```
-
-To avoid this, you may use the `wrapBytes` function to wrap the offset around the byte array length. For instance, here's how we can use the `wrapBytes` function to move the pre-offset 4 bytes from the end of the byte array.
-
-```ts twoslash
-import { offsetCodec, resizeCodec, getU32Codec } from "@solana/kit";
-const biggerU32Codec = resizeCodec(getU32Codec(), (size) => size + 4);
-// ---cut-before---
-const u32InTheEndCodec = offsetCodec(biggerU32Codec, {
-  preOffset: ({ wrapBytes }) => wrapBytes(-4),
-});
-u32InTheEndCodec.encode(0xffffffff);
-// 0x00000000ffffffff
-```
-
-As you can see, the `offsetCodec` helper allows you to jump all over the place with your codecs. This non-linear approach to encoding and decoding data allows you to achieve complex serialization strategies that would otherwise be impossible.
-
-The `offsetEncoder` and `offsetDecoder` functions can also be used to split your codec logic into tree-shakeable functions.
-
-```ts twoslash
+此外，后偏移函数```ts twoslash
 import {
   offsetEncoder,
   resizeEncoder,
@@ -771,7 +724,7 @@ const getU32InTheMiddleCodec = () => combineCodec(getU32InTheMiddleEncoder(), ge
 
 ### padBytes [!toc] [#pad-bytes]
 
-Pads a `Uint8Array` with zeroes (to the right) to the specified length.
+使用零（在右侧）填充 `Uint8Array` 到指定的长度。
 
 ```ts twoslash
 import { padBytes } from "@solana/kit";
@@ -782,7 +735,7 @@ padBytes(new Uint8Array([1, 2, 3, 4]), 2); // Uint8Array([1, 2, 3, 4])
 
 ### padLeftCodec [!toc] [#pad-left-codec]
 
-The `padLeftCodec` helper can be used to add padding to the left of a given codec. It accepts an `offset` number that tells us how big the padding should be.
+`padLeftCodec` 辅助函数可以用于在给定 codec 的左侧添加填充。它接受一个 `offset` 数值，用于指定填充的大小。
 
 ```ts twoslash
 import { padLeftCodec, getU16Codec } from "@solana/kit";
@@ -794,9 +747,9 @@ leftPaddedCodec.encode(0xffff);
 //   └-- Our 4-byte padding.
 ```
 
-Note that the `padLeftCodec` function is a simple wrapper around the `offsetCodec` and `resizeCodec` functions. For more complex padding strategies, you may want to use the [offsetCodec](#offset-codec) and [resizeCodec](#resize-codec) functions directly instead.
+请注意 `padLeftCodec` 函数是 `offsetCodec` 和 `resizeCodec` 函数的一个简单封装。对于更复杂的填充策略，您可能需要直接使用 [offsetCodec](#offset-codec) 和 [resizeCodec](#resize-codec) 函数。
 
-Encoder-only and decoder-only helpers are available for these padding functions.
+仅编码器和仅解码器的辅助函数可用于这些填充函数。
 
 ```ts twoslash
 import { padLeftEncoder, padLeftDecoder, getU16Encoder, getU16Decoder, combineCodec } from "@solana/kit";
@@ -808,7 +761,7 @@ const getMyPaddedCodec = () => combineCodec(getMyPaddedEncoder(), getMyPaddedDec
 
 ### padRightCodec [!toc] [#pad-right-codec]
 
-The `padRightCodec` helper can be used to add padding to the right of a given codec. It accepts an `offset` number that tells us how big the padding should be.
+`padRightCodec` 辅助函数可以用于在给定 codec 的右侧添加填充。它接受一个 `offset` 数值，用于指定填充的大小。
 
 ```ts twoslash
 import { padRightCodec, getU16Codec } from "@solana/kit";
@@ -820,9 +773,9 @@ rightPaddedCodec.encode(0xffff);
 //   └-- Our encoded u16 number.
 ```
 
-Note that the `padRightCodec` function is a simple wrapper around the `offsetCodec` and `resizeCodec` functions. For more complex padding strategies, you may want to use the [offsetCodec](#offset-codec) and [resizeCodec](#resize-codec) functions directly instead.
+请注意 `padRightCodec` 函数是 `offsetCodec` 和 `resizeCodec` 函数的一个简单封装。对于更复杂的填充策略，您可能需要直接使用 [offsetCodec](#offset-codec) 和 [resizeCodec](#resize-codec) 函数。
 
-Encoder-only and decoder-only helpers are available for these padding functions.
+仅编码器和仅解码器的辅助函数可用于这些填充函数。
 
 ```ts twoslash
 import { padRightEncoder, padRightDecoder, getU16Encoder, getU16Decoder, combineCodec } from "@solana/kit";
@@ -834,27 +787,29 @@ const getMyPaddedCodec = () => combineCodec(getMyPaddedEncoder(), getMyPaddedDec
 
 ### resizeCodec [!toc] [#resize-codec]
 
-The `resizeCodec` helper re-defines the size of a given codec by accepting a function that takes the current size of the codec and returns a new size. This works for both fixed-size and variable-size codecs.
+`resizeCodec` 辅助函数通过接受一个函数来重新定义给定 codec 的大小，该函数接收 codec 的当前大小并返回一个新大小。这适用于固定大小和可变大小的 codec。
 
 ```ts twoslash
 import { resizeCodec, getU32Codec, getUtf8Codec } from "@solana/kit";
 // ---cut-before---
 // Fixed-size codec.
+// 固定大小的 codec。
 const getBiggerU32Codec = () => resizeCodec(getU32Codec(), (size) => size + 4);
 getBiggerU32Codec().encode(42);
 // 0x2a00000000000000
-//   |       └-- Empty buffer space caused by the resizeCodec function.
-//   └-- Our encoded u32 number.
+//   |       └-- 空白缓冲区空间由 resizeCodec 函数引起。
+//   └-- 我们编码的 u32 数字。
 
 // Variable-size codec.
+// 可变大小的 codec。
 const getBiggerUtf8Codec = () => resizeCodec(getUtf8Codec(), (size) => size + 4);
 getBiggerUtf8Codec().encode("ABC");
 // 0x41424300000000
-//   |     └-- Empty buffer space caused by the resizeCodec function.
-//   └-- Our encoded string.
+//   |     └-- 空白缓冲区空间由 resizeCodec 函数引起。
+//   └-- 我们编码的字符串。
 ```
 
-Note that the `resizeCodec` function doesn't change any encoded or decoded bytes, it merely tells the `encode` and `decode` functions how big the `Uint8Array` should be before delegating to their respective `write` and `read` functions. In fact, this is completely bypassed when using the `write` and `read` functions directly. For instance:
+请注意，`resizeCodec` 函数不会更改任何编码或解码的字节，它只是告诉 `encode` 和 `decode` 函数 `Uint8Array` 在委托给它们各自的 `write` 和 `read` 函数之前应该有多大。实际上，当直接使用 `write` 和 `read` 函数时，这会被完全绕过。例如：
 
 ```ts twoslash
 import { resizeCodec, getU32Codec } from "@solana/kit";
@@ -862,16 +817,18 @@ import { resizeCodec, getU32Codec } from "@solana/kit";
 const getBiggerU32Codec = () => resizeCodec(getU32Codec(), (size) => size + 4);
 
 // Using the encode function.
+// 使用 encode 函数。
 getBiggerU32Codec().encode(42);
 // 0x2a00000000000000
 
 // Using the lower-level write function.
+// 使用底层 write 函数。
 const myCustomBytes = new Uint8Array(4);
 getBiggerU32Codec().write(42, myCustomBytes, 0);
 // 0x2a000000
 ```
 
-So when would it make sense to use the `resizeCodec` function? This function is particularly useful when combined with the [offsetCodec](#offset-codec) function. Whilst `offsetCodec` may help us push the offset forward — e.g. to skip some padding — it won't change the size of the encoded data which means the last bytes will be truncated by how much we pushed the offset forward. The `resizeCodec` function can be used to fix that. For instance, here's how we can use the `resizeCodec` and the `offsetCodec` functions together to create a struct codec that includes some padding.
+那么什么时候使用 `resizeCodec` 函数才有意义呢？此函数在与 [offsetCodec](#offset-codec) 函数结合使用时特别有用。虽然 `offsetCodec` 可以帮助我们将偏移量向前推进 - 例如，跳过一些填充 - 但它不会改变编码数据的大小，这意味着最后的字节将被我们向前推进的偏移量截断。`resizeCodec` 函数可以用来解决这个问题。例如，以下是我们如何一起使用 `resizeCodec` 和 `offsetCodec` 函数来创建一个包含一些填充的结构体 codec。
 
 ```ts twoslash
 import { getStructCodec, getUtf8Codec, getU32Codec, offsetCodec, resizeCodec, fixCodecSize } from "@solana/kit";
@@ -879,6 +836,7 @@ import { getStructCodec, getUtf8Codec, getU32Codec, offsetCodec, resizeCodec, fi
 const personCodec = getStructCodec([
   ["name", fixCodecSize(getUtf8Codec(), 8)],
   // There is a 4-byte padding between name and age.
+  // 姓名和年龄之间有 4 字节的填充。
   [
     "age",
     offsetCodec(
@@ -890,14 +848,14 @@ const personCodec = getStructCodec([
 
 personCodec.encode({ name: "Alice", age: 42 });
 // 0x416c696365000000000000002a000000
-//   |               |       └-- Our encoded u32 (42).
-//   |               └-- The 4-bytes of padding we are skipping.
-//   └-- Our 8-byte encoded string ("Alice").
+//   |               |       └-- 我们编码的 u32 (42)。
+//   |               └-- 我们跳过的 4 字节填充。
+//   └-- 我们 8 字节编码的字符串 ("Alice")。
 ```
 
-Note that this can be achieved using the [padLeftCodec](#pad-left-codec) helper which is implemented that way.
+请注意，这可以使用以这种方式实现的 [padLeftCodec](#pad-left-codec) 辅助函数来实现。
 
-The `resizeEncoder` and `resizeDecoder` functions can also be used to split your codec logic into tree-shakeable functions.
+`resizeEncoder` 和 `resizeDecoder` 函数也可用于将您的 codec 逻辑拆分为可 tree-shake 的函数。
 
 ```ts twoslash
 import { resizeEncoder, resizeDecoder, getU32Encoder, getU32Decoder, combineCodec } from "@solana/kit";
@@ -909,7 +867,7 @@ const getBiggerU32Codec = () => combineCodec(getBiggerU32Encoder(), getBiggerU32
 
 ### reverseCodec [!toc] [#reverse-codec]
 
-The `reverseCodec` helper reverses the bytes of the provided `FixedSizeCodec`.
+`reverseCodec` 辅助函数反转提供的 `FixedSizeCodec` 的字节。
 
 ```ts twoslash
 import { reverseCodec, getU64Codec } from "@solana/kit";
@@ -917,7 +875,7 @@ import { reverseCodec, getU64Codec } from "@solana/kit";
 const getBigEndianU64Codec = () => reverseCodec(getU64Codec());
 ```
 
-Note that number codecs can already do that for you via their `endian` option.
+请注意，数字 codec 已经可以通过其 `endian` 选项为您执行此操作。
 
 ```ts twoslash
 import { getU64Codec, Endian } from "@solana/kit";
@@ -925,7 +883,7 @@ import { getU64Codec, Endian } from "@solana/kit";
 const getBigEndianU64Codec = () => getU64Codec({ endian: Endian.Big });
 ```
 
-The `reverseEncoder` and `reverseDecoder` functions can also be used to achieve that.
+`reverseEncoder` 和 `reverseDecoder` 函数也可用于实现此目的。
 
 ```ts twoslash
 import { reverseEncoder, reverseDecoder, getU64Encoder, getU64Decoder, combineCodec } from "@solana/kit";
@@ -937,9 +895,9 @@ const getBigEndianU64Codec = () => combineCodec(getBigEndianU64Encoder(), getBig
 
 ### transformCodec [!toc] [#transform-codec]
 
-It is possible to transform a `Codec<T>` to a `Codec<U>` by providing two mapping functions: one that goes from `T` to `U` and one that does the opposite.
+通过提供两个映射函数，可以将 `Codec<T>` 转换为 `Codec<U>`：一个是从 `T` 到 `U`，另一个是相反的映射。
 
-For instance, here's how you would map a `u32` integer into a `string` representation of that number.
+例如，以下介绍如何将 `u32` 整数映射到该数字的 `string` 表示形式。
 
 ```ts twoslash
 import { transformCodec, getU32Codec } from "@solana/kit";
@@ -955,9 +913,9 @@ getStringU32Codec().encode("42"); // new Uint8Array([42])
 getStringU32Codec().decode(new Uint8Array([42])); // "42"
 ```
 
-If a `Codec` has [different From and To types](#different-from-and-to-types), say `Codec<OldFrom, OldTo>`, and we want to map it to `Codec<NewFrom, NewTo>`, we must provide functions that map from `NewFrom` to `OldFrom` and from `OldTo` to `NewTo`.
+如果 `Codec` 具有[不同的 From 和 To 类型](#different-from-and-to-types)，例如 `Codec<OldFrom, OldTo>`，并且我们想要将其映射到 `Codec<NewFrom, NewTo>`，我们必须提供从 `NewFrom` 映射到 `OldFrom` 以及从 `OldTo` 映射到 `NewTo` 的函数。
 
-To illustrate that, let's take our previous `getStringU32Codec` example but make it use a `getU64Codec` codec instead as it returns a `Codec<number | bigint, bigint>`. Additionally, let's make it so our `getStringU64Codec` function returns a `Codec<number | string, string>` so that it also accepts numbers when encoding values. Here's what our mapping functions look like:
+为了说明这一点，让我们采用之前的 `getStringU32Codec` 示例，但使用 `getU64Codec` codec，因为它返回 `Codec<number | bigint, bigint>`。此外，让我们让我们的 `getStringU64Codec` 函数返回 `Codec<number | string, string>`，以便它在编码值时也接受数字。以下是我们的映射函数的样子：
 
 ```ts twoslash
 import { transformCodec, getU64Codec } from "@solana/kit";
@@ -971,9 +929,9 @@ const getStringU64Codec = () =>
   );
 ```
 
-Note that the second function that maps the decoded type is optional. That means, you can omit it to simply update or loosen the type to encode whilst keeping the decoded type the same.
+请注意，映射解码类型的第二个函数是可选的。这意味着，您可以省略它以简单地更新或放宽要编码的类型，同时保持解码类型不变。
 
-This is particularly useful to provide default values to object structures. For instance, here's how we can map a `Person` codec to give a default value to its `age` attribute.
+这对于为对象结构提供默认值特别有用。例如，以下是我们如何映射 `Person` codec 以为其 `age` 属性赋予默认值。
 
 ```ts twoslash
 import { transformCodec, getStructCodec, Codec } from "@solana/kit";
@@ -987,7 +945,7 @@ const getPersonWithDefaultValueCodec = (): Codec<PersonInput, Person> =>
   transformCodec(getPersonCodec(), (person: PersonInput): Person => ({ ...person, age: person.age ?? 42 }));
 ```
 
-Similar helpers exist to map `Encoder` and `Decoder` instances allowing you to separate your codec logic into tree-shakeable functions. Here's our `getStringU32Codec` written that way.
+存在类似的辅助程序来映射 `Encoder` 和 `Decoder` 实例，允许您将 codec 逻辑分隔为可 tree-shake 的函数。以下是以这种方式编写的 `getStringU32Codec`。
 
 ```ts twoslash
 import { transformEncoder, transformDecoder, getU32Encoder, getU32Decoder, combineCodec } from "@solana/kit";
@@ -998,13 +956,13 @@ const getStringU32Decoder = () => transformDecoder(getU32Decoder(), (integer: nu
 const getStringU32Codec = () => combineCodec(getStringU32Encoder(), getStringU32Decoder());
 ```
 
-## Numbers listing [!toc]
+## 数字列表 [!toc]
 
 ### getI8Codec [!toc] [#get-i8-codec]
 
-Encodes and decodes **signed 8-bit integers**. It supports values from -127 (`-2^7`) to 128 (`2^7 - 1`).
+编码和解码 **有符号 8 位整数**。它支持从 -127 (`-2^7`) 到 128 (`2^7 - 1`) 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `number`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `number`。
 
 ```ts twoslash
 import { getI8Codec } from "@solana/kit";
@@ -1014,159 +972,174 @@ const bytes = codec.encode(-42); // 0xd6
 const value = codec.decode(bytes); // -42
 ```
 
-`getI8Encoder` and `getI8Decoder` functions are also available.
+`getI8Encoder` 和 `getI8Decoder` 函数也可用。
 
 ### getI16Codec [!toc] [#get-i16-codec]
 
-Encodes and decodes **signed 16-bit integers**. It supports values from -32,768 (`-2^15`) to 32,767 (`2^15 - 1`).
+编码和解码 **有符号 16 位整数**。它支持从 -32,768 (`-2^15`) 到 32,767 (`2^15 - 1`) 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `number`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `number`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getI16Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getI16Codec();
 const bytes = codec.encode(-42); // 0xd6ff
 const value = codec.decode(bytes); // -42
 
 // Big-endian.
+// 大端。
 const beCodec = getI16Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(-42); // 0xffd6
 const beValue = beCodec.decode(bytes); // -42
 ```
 
-`getI16Encoder` and `getI16Decoder` functions are also available.
+`getI16Encoder` 和 `getI16Decoder` 函数也可用。
 
 ### getI32Codec [!toc] [#get-i32-codec]
 
-Encodes and decodes **signed 32-bit integers**. It supports values from -2,147,483,648 (`-2^31`) to 2,147,483,647 (`2^31 - 1`).
+编码和解码 **有符号 32 位整数**。它支持从 -2,147,483,648 (`-2^31`) 到 2,147,483,647 (`2^31 - 1`) 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `number`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `number`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getI32Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getI32Codec();
 const bytes = codec.encode(-42); // 0xd6ffffff
 const value = codec.decode(bytes); // -42
 
 // Big-endian.
+// 大端。
 const beCodec = getI32Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(-42); // 0xffffffd6
 const beValue = beCodec.decode(bytes); // -42
 ```
 
-`getI32Encoder` and `getI32Decoder` functions are also available.
+`getI32Encoder` 和 `getI32Decoder` 函数也可用。
 
 ### getI64Codec [!toc] [#get-i64-codec]
 
-Encodes and decodes **signed 64-bit integers**. It supports values from `-2^63` to `2^63 - 1`.
+编码和解码 **有符号 64 位整数**。它支持从 `-2^63` 到 `2^63 - 1` 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `bigint`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `bigint`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getI64Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getI64Codec();
 const bytes = codec.encode(-42); // 0xd6ffffffffffffff
 const value = codec.decode(bytes); // BigInt(-42)
 
 // Big-endian.
+// 大端。
 const beCodec = getI64Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(-42); // 0xffffffffffffffd6
 const beValue = beCodec.decode(bytes); // BigInt(-42)
 ```
 
-`getI64Encoder` and `getI64Decoder` functions are also available.
+`getI64Encoder` 和 `getI64Decoder` 函数也可用。
 
 ### getI128Codec [!toc] [#get-i128-codec]
 
-Encodes and decodes **signed 128-bit integers**. It supports values from `-2^127` to `2^127 - 1`.
+编码和解码 **有符号 128 位整数**。它支持从 `-2^127` 到 `2^127 - 1` 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `bigint`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `bigint`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getI128Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getI128Codec();
 const bytes = codec.encode(-42); // 0xd6ffffffffffffffffffffffffffffff
 const value = codec.decode(bytes); // BigInt(-42)
 
 // Big-endian.
+// 大端。
 const beCodec = getI128Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(-42); // 0xffffffffffffffffffffffffffffffd6
 const beValue = beCodec.decode(bytes); // BigInt(-42)
 ```
 
-`getI128Encoder` and `getI128Decoder` functions are also available.
+`getI128Encoder` 和 `getI128Decoder` 函数也可用。
 
 ### getF32Codec [!toc] [#get-f32-codec]
 
-Encodes and decodes **32-bit floating-point numbers**. Due to the [IEEE 754](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) floating-point representation, some precision loss may occur.
+编码和解码 **32 位浮点数**。由于 [IEEE 754](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) 浮点表示，可能会发生一些精度损失。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `number`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `number`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getF32Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getF32Codec();
 const bytes = codec.encode(-1.5); // 0x0000c0bf
 const value = codec.decode(bytes); // -1.5
 
 // Big-endian.
+// 大端。
 const beCodec = getF32Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(-1.5); // 0xbfc00000
 const beValue = beCodec.decode(bytes); // -1.5
 ```
 
-`getF32Encoder` and `getF32Decoder` functions are also available.
+`getF32Encoder` 和 `getF32Decoder` 函数也可用。
 
 ### getF64Codec [!toc] [#get-f64-codec]
 
-Encodes and decodes **64-bit floating-point numbers**. Due to the [IEEE 754](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) floating-point representation, some precision loss may occur.
+编码和解码 **64 位浮点数**。由于 [IEEE 754](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) 浮点表示，可能会发生一些精度损失。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `number`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `number`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getF64Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getF64Codec();
 const bytes = codec.encode(-1.5); // 0x000000000000f8bf
 const value = codec.decode(bytes); // -1.5
 
 // Big-endian.
+// 大端。
 const beCodec = getF64Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(-1.5); // 0xbff8000000000000
 const beValue = beCodec.decode(bytes); // -1.5
 ```
 
-`getF64Encoder` and `getF64Decoder` functions are also available.
+`getF64Encoder` 和 `getF64Decoder` 函数也可用。
 
 ### getShortU16Codec [!toc] [#get-short-u16-codec]
 
-Encodes and decodes **unsigned integer using 1 to 3 bytes** based on the encoded value. It supports values from 0 to 4,194,303 (`2^22 - 1`).
+根据编码后的值，使用 **1 到 3 个字节**编码和解码 **无符号整数**。它支持从 0 到 4,194,303 (`2^22 - 1`) 的值。
 
-The larger the value, the more bytes it uses.
+值越大，它使用的字节就越多。
 
-- If the value is `<= 0x7f` (127), it is stored in a **single byte** and the first bit is set to `0` to indicate the end of the value.
-- Otherwise, the first bit is set to `1` to indicate that the value continues in the next byte, which follows the same pattern.
-- This process repeats until the value is fully encoded in up to 3 bytes. The third and last byte, if needed, uses all 8 bits to store the remaining value.
+- 如果该值 `<= 0x7f` (127)，它将存储在 **单个字节**中，并且第一位设置为 `0` 以指示该值的结束。
+- 否则，第一位设置为 `1` 以指示该值在下一个字节中继续，下一个字节遵循相同的模式。
+- 此过程一直重复，直到该值完全编码为最多 3 个字节。第三个也是最后一个字节（如果需要）使用所有 8 位来存储剩余值。
 
-In other words, the encoding scheme follows this structure:
+换句话说，编码方案遵循以下结构：
 
 ```txt
 0XXXXXXX                   <- Values 0 to 127 (1 byte)
+// 0 到 127 的值（1 个字节）
 1XXXXXXX 0XXXXXXX          <- Values 128 to 16,383 (2 bytes)
+// 128 到 16,383 的值（2 个字节）
 1XXXXXXX 1XXXXXXX XXXXXXXX <- Values 16,384 to 4,194,303 (3 bytes)
+// 16,384 到 4,194,303 的值（3 个字节）
 ```
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `number`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `number`。
 
 ```ts twoslash
 import { getShortU16Codec } from "@solana/kit";
@@ -1181,13 +1154,13 @@ codec.decode(bytes2); // 128
 codec.decode(bytes3); // 16384
 ```
 
-`getShortU16Encoder` and `getShortU16Decoder` functions are also available.
+`getShortU16Encoder` 和 `getShortU16Decoder` 函数也可用。
 
 ### getU8Codec [!toc] [#get-u8-codec]
 
-Encodes and decodes **unsigned 8-bit integers**. It supports values from 0 to 255 (`2^8 - 1`).
+编码和解码 **无符号 8 位整数**。它支持从 0 到 255 (`2^8 - 1`) 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `number`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `number`。
 
 ```ts twoslash
 import { getU8Codec } from "@solana/kit";
@@ -1197,101 +1170,109 @@ const bytes = codec.encode(42); // 0x2a
 const value = codec.decode(bytes); // 42
 ```
 
-`getU8Encoder` and `getU8Decoder` functions are also available.
+`getU8Encoder` 和 `getU8Decoder` 函数也可用。
 
 ### getU16Codec [!toc] [#get-u16-codec]
 
-Encodes and decodes **unsigned 16-bit integers**. It supports values from 0 to 65,535 (`2^16 - 1`).
+编码和解码 **无符号 16 位整数**。它支持从 0 到 65,535 (`2^16 - 1`) 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `number`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `number`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getU16Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getU16Codec();
 const bytes = codec.encode(42); // 0x2a00
 const value = codec.decode(bytes); // 42
 
 // Big-endian.
+// 大端。
 const beCodec = getU16Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(42); // 0x002a
 const beValue = beCodec.decode(bytes); // 42
 ```
 
-`getU16Encoder` and `getU16Decoder` functions are also available.
+`getU16Encoder` 和 `getU16Decoder` 函数也可用。
 
 ### getU32Codec [!toc] [#get-u32-codec]
 
-Encodes and decodes **unsigned 32-bit integers**. It supports values from 0 to 4,294,967,295 (`2^32 - 1`).
+编码和解码 **无符号 32 位整数**。它支持从 0 到 4,294,967,295 (`2^32 - 1`) 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `number`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `number`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getU32Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getU32Codec();
 const bytes = codec.encode(42); // 0x2a000000
 const value = codec.decode(bytes); // 42
 
 // Big-endian.
+// 大端。
 const beCodec = getU32Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(42); // 0x0000002a
 const beValue = beCodec.decode(bytes); // 42
 ```
 
-`getU32Encoder` and `getU32Decoder` functions are also available.
+`getU32Encoder` 和 `getU32Decoder` 函数也可用。
 
 ### getU64Codec [!toc] [#get-u64-codec]
 
-Encodes and decodes **unsigned 64-bit integers**. It supports values from 0 to `2^64 - 1`.
+编码和解码 **无符号 64 位整数**。它支持从 0 到 `2^64 - 1` 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `bigint`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `bigint`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getU64Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getU64Codec();
 const bytes = codec.encode(42); // 0x2a00000000000000
 const value = codec.decode(bytes); // 42
 
 // Big-endian.
+// 大端。
 const beCodec = getU64Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(42); // 0x000000000000002a
 const beValue = beCodec.decode(bytes); // 42
 ```
 
-`getU64Encoder` and `getU64Decoder` functions are also available.
+`getU64Encoder` 和 `getU64Decoder` 函数也可用。
 
 ### getU128Codec [!toc] [#get-u128-codec]
 
-Encodes and decodes **unsigned 128-bit integers**. It supports values from 0 to `2^128 - 1`.
+编码和解码 **无符号 128 位整数**。它支持从 0 到 `2^128 - 1` 的值。
 
-Values can be provided as either `number` or `bigint`, but the decoded value is always a `bigint`. Endianness can be specified using the `endian` option. The default is `Endian.Little`.
+值可以以 `number` 或 `bigint` 的形式提供，但解码后的值始终是一个 `bigint`。可以使用 `endian` 选项指定字节序。默认值为 `Endian.Little`。
 
 ```ts twoslash
 import { getU128Codec, Endian } from "@solana/kit";
 // ---cut-before---
 // Little-endian.
+// 小端。
 const codec = getU128Codec();
 const bytes = codec.encode(42); // 0x2a000000000000000000000000000000
 const value = codec.decode(bytes); // 42
 
 // Big-endian.
+// 大端。
 const beCodec = getU128Codec({ endian: Endian.Big });
 const beBytes = beCodec.encode(42); // 0x0000000000000000000000000000002a
 const beValue = beCodec.decode(bytes); // 42
 ```
 
-`getU128Encoder` and `getU128Decoder` functions are also available.
+`getU128Encoder` 和 `getU128Decoder` 函数也可用。
 
-## Strings listing [!toc]
+## 字符串列表 [!toc]
 
 ### getBase10Codec [!toc] [#get-base10-codec]
 
-Encodes and decodes **Base 10 strings**.
+编码和解码 **Base 10 字符串**。
 
 ```ts twoslash
 import { getBase10Codec } from "@solana/kit";
@@ -1301,30 +1282,31 @@ const bytes = codec.encode("1024"); // 0x0400
 const value = codec.decode(bytes); // "1024"
 ```
 
-This codec does not enforce a size boundary. It will encode and decode all bytes necessary to represent the string. To add size constraints to your codec, you may use utility functions such as [`fixCodecSize`](#fix-codec-size), [`addCodecSizePrefix`](#add-codec-size-prefix) or [`addCodecSentinel`](#add-codec-sentinel).
+此 codec 不强制执行大小边界。它将编码和解码表示字符串所需的所有字节。要向 codec 添加大小约束，可以使用实用程序函数，例如 [`fixCodecSize`](#fix-codec-size)、[`addCodecSizePrefix`](#add-codec-size-prefix) 或 [`addCodecSentinel`](#add-codec-sentinel)。
 
 ```ts twoslash
 import { getBase10Codec, fixCodecSize, addCodecSizePrefix, getU32Codec, addCodecSentinel } from "@solana/kit";
 // ---cut-before---
 fixCodecSize(getBase10Codec(), 4).encode("1024");
 // 0x04000000 (padded to 4 bytes)
+// (填充到 4 个字节)
 
 addCodecSizePrefix(getBase10Codec(), getU32Codec()).encode("1024");
 // 0x020000000400
-//   |       └-- The 2 bytes of content.
-//   └-- 4-byte prefix telling us to read 2 bytes.
+//   |       └-- 内容的 2 个字节。
+//   └-- 4 字节前缀，告诉我们读取 2 个字节。
 
 addCodecSentinel(getBase10Codec(), new Uint8Array([0xff, 0xff])).encode("1024");
 // 0x0400ffff
-//   |   └-- The sentinel signaling the end of the content.
-//   └-- The 2 bytes of content.
+//   |   └-- 指示内容结尾的哨兵。
+//   └-- 内容的 2 个字节。
 ```
 
-`getBase10Encoder` and `getBase10Decoder` functions are also available.
+`getBase10Encoder` 和 `getBase10Decoder` 函数也可用。
 
 ### getBase16Codec [!toc] [#get-base16-codec]
 
-Encodes and decodes **Base 16 strings**.
+编码和解码 **Base 16 字符串**。
 
 ```ts twoslash
 import { getBase16Codec } from "@solana/kit";
@@ -1334,30 +1316,31 @@ const bytes = codec.encode("deadface"); // 0xdeadface
 const value = codec.decode(bytes); // "deadface"
 ```
 
-This codec does not enforce a size boundary. It will encode and decode all bytes necessary to represent the string. To add size constraints to your codec, you may use utility functions such as [`fixCodecSize`](#fix-codec-size), [`addCodecSizePrefix`](#add-codec-size-prefix) or [`addCodecSentinel`](#add-codec-sentinel).
+此 codec 不强制执行大小边界。它将编码和解码表示字符串所需的所有字节。要向 codec 添加大小约束，可以使用实用程序函数，例如 [`fixCodecSize`](#fix-codec-size)、[`addCodecSizePrefix`](#add-codec-size-prefix) 或 [`addCodecSentinel`](#add-codec-sentinel)。
 
 ```ts twoslash
 import { getBase16Codec, fixCodecSize, addCodecSizePrefix, getU32Codec, addCodecSentinel } from "@solana/kit";
 // ---cut-before---
 fixCodecSize(getBase16Codec(), 2).encode("deadface");
 // 0xdead (truncated to 2 bytes)
+// （截断为 2 个字节）
 
 addCodecSizePrefix(getBase16Codec(), getU32Codec()).encode("deadface");
 // 0x04000000deadface
-//   |       └-- The 4 bytes of content.
-//   └-- 4-byte prefix telling us to read 4 bytes.
+//   |       └-- 内容的 4 个字节。
+//   └-- 4 字节前缀，告诉我们读取 4 个字节。
 
 addCodecSentinel(getBase16Codec(), new Uint8Array([0xff, 0xff])).encode("deadface");
 // 0xdeadfaceffff
-//   |       └-- The sentinel signaling the end of the content.
-//   └-- The 4 bytes of content.
+//   |       └-- 指示内容结尾的哨兵。
+//   └-- 内容的 4 个字节。
 ```
 
-`getBase16Encoder` and `getBase16Decoder` functions are also available.
+`getBase16Encoder` 和 `getBase16Decoder` 函数也可用。
 
-### getBase58Codec [!toc] [#get-base58-codec]
+### getBase58Codec [!toc] [#get-base-58-codec]
 
-Encodes and decodes **Base 58 strings**.
+编码和解码 **Base 58 字符串**。
 
 ```ts twoslash
 import { getBase58Codec } from "@solana/kit";
@@ -1367,73 +1350,7 @@ const bytes = codec.encode("heLLo"); // 0x1b6a3070
 const value = codec.decode(bytes); // "heLLo"
 ```
 
-This codec does not enforce a size boundary. It will encode and decode all bytes necessary to represent the string. To add size constraints to your codec, you may use utility functions such as [`fixCodecSize`](#fix-codec-size), [`addCodecSizePrefix`](#add-codec-size-prefix) or [`addCodecSentinel`](#add-codec-sentinel).
-
-```ts twoslash
-import { getBase58Codec, fixCodecSize, addCodecSizePrefix, getU32Codec, addCodecSentinel } from "@solana/kit";
-// ---cut-before---
-fixCodecSize(getBase58Codec(), 2).encode("heLLo");
-// 0x1b6a (truncated to 2 bytes)
-
-addCodecSizePrefix(getBase58Codec(), getU32Codec()).encode("heLLo");
-// 0x040000001b6a3070
-//   |       └-- The 4 bytes of content.
-//   └-- 4-byte prefix telling us to read 4 bytes.
-
-addCodecSentinel(getBase58Codec(), new Uint8Array([0xff, 0xff])).encode("heLLo");
-// 0x1b6a3070ffff
-//   |       └-- The sentinel signaling the end of the content.
-//   └-- The 4 bytes of content.
-```
-
-`getBase58Encoder` and `getBase58Decoder` functions are also available.
-
-### getBase64Codec [!toc] [#get-base64-codec]
-
-Encodes and decodes **Base 64 strings**.
-
-```ts twoslash
-import { getBase64Codec } from "@solana/kit";
-// ---cut-before---
-const codec = getBase64Codec();
-const bytes = codec.encode("hello+world"); // 0x85e965a3ec28ae57
-const value = codec.decode(bytes); // "hello+world"
-```
-
-This codec does not enforce a size boundary. It will encode and decode all bytes necessary to represent the string. To add size constraints to your codec, you may use utility functions such as [`fixCodecSize`](#fix-codec-size), [`addCodecSizePrefix`](#add-codec-size-prefix) or [`addCodecSentinel`](#add-codec-sentinel).
-
-```ts twoslash
-import { getBase64Codec, fixCodecSize, addCodecSizePrefix, getU32Codec, addCodecSentinel } from "@solana/kit";
-// ---cut-before---
-fixCodecSize(getBase64Codec(), 4).encode("hello+world");
-// 0x85e965a3 (truncated to 4 bytes)
-
-addCodecSizePrefix(getBase64Codec(), getU32Codec()).encode("hello+world");
-// 0x0400000085e965a3ec28ae57
-//   |       └-- The 8 bytes of content.
-//   └-- 4-byte prefix telling us to read 8 bytes.
-
-addCodecSentinel(getBase64Codec(), new Uint8Array([0xff, 0xff])).encode("hello+world");
-// 0x85e965a3ec28ae57ffff
-//   |               └-- The sentinel signaling the end of the content.
-//   └-- The 8 bytes of content.
-```
-
-`getBase64Encoder` and `getBase64Decoder` functions are also available.
-
-### getBaseXCodec [!toc] [#get-baseX-codec]
-
-The `getBaseXCodec` accepts a custom `alphabet` of `X` characters and **creates a base-X codec using that alphabet**. It does so by iteratively dividing by `X` and handling leading zeros.
-
-```ts twoslash
-import { getBaseXCodec } from "@solana/kit";
-// ---cut-before---
-const codec = getBaseXCodec("0ehlo");
-const bytes = codec.encode("hello"); // 0x05bd
-const value = codec.decode(bytes); // "hello"
-```
-
-This codec does not enforce a size boundary. It will encode and decode all bytes necessary to represent the string. To add size constraints to your codec, you may use utility functions such as [`fixCodecSize`](#fix-codec-size), [`addCodecSizePrefix`](#add-codec-size-prefix) or [`addCodecSentinel`](#add-codec-sentinel).
+此 codec 不强制执行大小边界。它将编码和解码这段 codec 不强制大小边界。它将编码和解码所有必要的字节来表示字符串。要向你的 codec 添加大小约束，你可以使用诸如 [`fixCodecSize`](#fix-codec-size)，[`addCodecSizePrefix`](#add-codec-size-prefix) 或 [`addCodecSentinel`](#add-codec-sentinel) 等实用函数。
 
 ```ts twoslash
 import { getBaseXCodec, fixCodecSize, addCodecSizePrefix, getU32Codec, addCodecSentinel } from "@solana/kit";
@@ -1445,24 +1362,24 @@ fixCodecSize(codec, 4).encode("hello");
 
 addCodecSizePrefix(codec, getU32Codec()).encode("hello");
 // 0x0200000005bd
-//   |       └-- The 2 bytes of content.
-//   └-- 4-byte prefix telling us to read 2 bytes.
+//   |       └-- 内容的 2 个字节。
+//   └-- 4 字节前缀告诉我们要读取 2 个字节。
 
 addCodecSentinel(codec, new Uint8Array([0xff, 0xff])).encode("hello");
 // 0x05bdffff
-//   |   └-- The sentinel signaling the end of the content.
-//   └-- The 2 bytes of content.
+//   |   └-- 发出内容结束信号的 sentinel。
+//   └-- 内容的 2 个字节。
 ```
 
-`getBaseXEncoder` and `getBaseXDecoder` functions are also available.
+`getBaseXEncoder` 和 `getBaseXDecoder` 函数也可用。
 
 ### getBaseXResliceCodec [!toc] [#get-baseX-reslice-codec]
 
-The `getBaseXResliceCodec` accepts a custom `alphabet` of `X` characters and **creates a base-X codec using that alphabet**.
+`getBaseXResliceCodec` 接受一个由 `X` 个字符组成的自定义 `alphabet`，并**使用该字母表创建一个 base-X codec**。
 
-It does so by re-slicing bytes into custom chunks of bits that are then mapped to the provided `alphabet`. The number of bits per chunk is also provided as the second argument and should typically be set to `log2(alphabet.length)`.
+它通过将字节重新切片成自定义的位块，然后将这些位块映射到提供的 `alphabet` 来实现这一点。每个块的位数也作为第二个参数提供，并且通常应设置为 `log2(alphabet.length)`。
 
-This is typically used to create codecs whose alphabet's length is a power of 2 such as base-16 or base-64.
+这通常用于创建字母表长度是2的幂的 codec，例如 base-16 或 base-64。
 
 ```ts twoslash
 import { getBaseXResliceCodec } from "@solana/kit";
@@ -1472,7 +1389,7 @@ const bytes = codec.encode("hellolol"); // 0x4aee
 const value = codec.decode(bytes); // "hellolol"
 ```
 
-This codec does not enforce a size boundary. It will encode and decode all bytes necessary to represent the string. To add size constraints to your codec, you may use utility functions such as [`fixCodecSize`](#fix-codec-size), [`addCodecSizePrefix`](#add-codec-size-prefix) or [`addCodecSentinel`](#add-codec-sentinel).
+这段 codec 不强制大小边界。它将编码和解码所有必要的字节来表示字符串。要向你的 codec 添加大小约束，你可以使用诸如 [`fixCodecSize`](#fix-codec-size)，[`addCodecSizePrefix`](#add-codec-size-prefix) 或 [`addCodecSentinel`](#add-codec-sentinel) 等实用函数。
 
 ```ts twoslash
 import { getBaseXResliceCodec, fixCodecSize, addCodecSizePrefix, getU32Codec, addCodecSentinel } from "@solana/kit";
@@ -1484,20 +1401,20 @@ fixCodecSize(codec, 4).encode("hellolol");
 
 addCodecSizePrefix(codec, getU32Codec()).encode("hellolol");
 // 0x020000004aee
-//   |       └-- The 2 bytes of content.
-//   └-- 4-byte prefix telling us to read 2 bytes.
+//   |       └-- 内容的 2 个字节。
+//   └-- 4 字节前缀告诉我们要读取 2 个字节。
 
 addCodecSentinel(codec, new Uint8Array([0xff, 0xff])).encode("hellolol");
 // 0x4aeeffff
-//   |   └-- The sentinel signaling the end of the content.
-//   └-- The 2 bytes of content.
+//   |   └-- 发出内容结束信号的 sentinel。
+//   └-- 内容的 2 个字节。
 ```
 
-`getBaseXResliceEncoder` and `getBaseXResliceDecoder` functions are also available.
+`getBaseXResliceEncoder` 和 `getBaseXResliceDecoder` 函数也可用。
 
 ### getUtf8Codec [!toc] [#get-utf8-codec]
 
-Encodes and decodes **UTF-8 strings**.
+编码和解码 **UTF-8 字符串**。
 
 ```ts twoslash
 import { getUtf8Codec } from "@solana/kit";
@@ -1507,7 +1424,7 @@ const bytes = codec.encode("hello"); // 0x68656c6c6f
 const value = codec.decode(bytes); // "hello"
 ```
 
-This codec does not enforce a size boundary. It will encode and decode all bytes necessary to represent the string. To add size constraints to your codec, you may use utility functions such as [`fixCodecSize`](#fix-codec-size), [`addCodecSizePrefix`](#add-codec-size-prefix) or [`addCodecSentinel`](#add-codec-sentinel).
+这段 codec 不强制大小边界。它将编码和解码所有必要的字节来表示字符串。要向你的 codec 添加大小约束，你可以使用诸如 [`fixCodecSize`](#fix-codec-size)，[`addCodecSizePrefix`](#add-codec-size-prefix) 或 [`addCodecSentinel`](#add-codec-sentinel) 等实用函数。
 
 ```ts twoslash
 import { getUtf8Codec, fixCodecSize, addCodecSizePrefix, getU32Codec, addCodecSentinel } from "@solana/kit";
@@ -1517,22 +1434,22 @@ fixCodecSize(getUtf8Codec(), 4).encode("hello");
 
 addCodecSizePrefix(getUtf8Codec(), getU32Codec()).encode("hello");
 // 0x0500000068656c6c6f
-//   |       └-- The 5 bytes of content.
-//   └-- 4-byte prefix telling us to read 5 bytes.
+//   |       └-- 内容的 5 个字节。
+//   └-- 4 字节前缀告诉我们要读取 5 个字节。
 
 addCodecSentinel(getUtf8Codec(), new Uint8Array([0xff, 0xff])).encode("hello");
 // 0x68656c6c6fffff
-//   |         └-- The sentinel signaling the end of the content.
-//   └-- The 5 bytes of content.
+//   |         └-- 发出内容结束信号的 sentinel。
+//   └-- 内容的 5 个字节。
 ```
 
-`getUtf8Encoder` and `getUtf8Decoder` functions are also available.
+`getUtf8Encoder` 和 `getUtf8Decoder` 函数也可用。
 
-## Data structures listing [!toc]
+## 数据结构列表 [!toc]
 
 ### getArrayCodec [!toc] [#get-array-codec]
 
-The `getArrayCodec` function accepts any codec of type `T` and returns a codec of type `Array<T>`.
+`getArrayCodec` 函数接受任何 `T` 类型的 codec，并返回 `Array<T>` 类型的 codec。
 
 ```ts twoslash
 import { getArrayCodec, getU8Codec } from "@solana/kit";
@@ -1542,45 +1459,45 @@ const bytes = codec.encode([1, 2, 3]); // 0x03000000010203
 const array = codec.decode(bytes); // [1, 2, 3]
 ```
 
-By default, the size of the array is stored as a `u32` prefix before encoding the items.
+默认情况下，在编码项目之前，数组的大小以 `u32` 前缀的形式存储。
 
 ```ts twoslash
 import { getArrayCodec, getU8Codec } from "@solana/kit";
 // ---cut-before---
 getArrayCodec(getU8Codec()).encode([1, 2, 3]);
 // 0x03000000010203
-//   |       └-- 3 items of 1 byte each.
-//   └-- 4-byte prefix telling us to read 3 items.
+//   |       └-- 每个 1 字节的 3 个项目。
+//   └-- 4 字节前缀告诉我们要读取 3 个项目。
 ```
 
-However, you may use the `size` option to configure this behaviour. It can be one of the following three strategies:
+但是，你可以使用 `size` 选项来配置此行为。它可以是以下三种策略之一：
 
-- `Codec<number>`: When a number codec is provided, that codec will be used to encode and decode the size prefix.
-- `number`: When a number is provided, the codec will expect a fixed number of items in the array. An error will be thrown when trying to encode an array of a different length.
-- `"remainder"`: When the string `"remainder"` is passed as a size, the codec will use the remainder of the bytes to encode/decode its items. This means the size is not stored or known in advance but simply inferred from the rest of the buffer. For instance, if we have an array of `u16` numbers and 10 bytes remaining, we know there are 5 items in this array.
+- `Codec<number>`：当提供数字 codec 时，该 codec 将用于编码和解码大小前缀。
+- `number`：当提供数字时，该 codec 将期望数组中具有固定数量的项目。当尝试编码长度不同的数组时，将引发错误。
+- `"remainder"`：当字符串 `"remainder"` 作为大小传递时，该 codec 将使用剩余的字节来编码/解码其项目。这意味着大小不会被存储或提前知道，而是简单地从缓冲区的其余部分推断出来。例如，如果我们有一个 `u16` 数字数组并剩下 10 个字节，我们就知道该数组中有 5 个项目。
 
 ```ts twoslash
 import { getArrayCodec, getU8Codec, getU16Codec } from "@solana/kit";
 // ---cut-before---
 getArrayCodec(getU8Codec(), { size: getU16Codec() }).encode([1, 2, 3]);
 // 0x0300010203
-//   |   └-- 3 items of 1 byte each.
-//   └-- 2-byte prefix telling us to read 3 items.
+//   |   └-- 每个 1 字节的 3 个项目。
+//   └-- 2 字节前缀告诉我们要读取 3 个项目。
 
 getArrayCodec(getU8Codec(), { size: 3 }).encode([1, 2, 3]);
 // 0x010203
-//   └-- 3 items of 1 byte each. There must always be 3 items in the array.
+//   └-- 每个 1 字节的 3 个项目。数组中必须始终有 3 个项目。
 
 getArrayCodec(getU8Codec(), { size: "remainder" }).encode([1, 2, 3]);
 // 0x010203
-//   └-- 3 items of 1 byte each. The size is inferred from the remainder of the bytes.
+//   └-- 每个 1 字节的 3 个项目。大小是从剩余的字节推断出来的。
 ```
 
-`getArrayEncoder` and `getArrayDecoder` functions are also available.
+`getArrayEncoder` 和 `getArrayDecoder` 函数也可用。
 
 ### getBitArrayCodec [!toc] [#get-bit-array-codec]
 
-The `getBitArrayCodec` function returns a codec that encodes and decodes an array of booleans such that each boolean is represented by a single bit. It requires the size of the codec in bytes and an optional `backward` flag that can be used to reverse the order of the bits.
+`getBitArrayCodec` 函数返回一个 codec，该 codec 编码和解码一个布尔数组，使得每个布尔值由单个位表示。它需要 codec 的大小（以字节为单位）和一个可选的 `backward` 标志，该标志可用于反转位的顺序。
 
 ```ts twoslash
 import { getBitArrayCodec } from "@solana/kit";
@@ -1594,11 +1511,11 @@ getBitArrayCodec(1, { backward: true }).encode(booleans);
 // 0x55 or 0b01010101
 ```
 
-`getBitArrayEncoder` and `getBitArrayDecoder` functions are also available.
+`getBitArrayEncoder` 和 `getBitArrayDecoder` 函数也可用。
 
 ### getBooleanCodec [!toc] [#get-boolean-codec]
 
-The `getBooleanCodec` function returns a `Codec<boolean>` that stores the boolean as `0` or `1` using a `u8` number by default.
+`getBooleanCodec` 函数返回一个 `Codec<boolean>`，默认情况下使用 `u8` 数字将布尔值存储为 `0` 或 `1`。
 
 ```ts twoslash
 import { getBooleanCodec } from "@solana/kit";
@@ -1608,7 +1525,7 @@ const bytes = codec.encode(true); // 0x01
 const value = codec.decode(bytes); // true
 ```
 
-You may configure that behaviour by providing an explicit number codec as the `size` option of the `getBooleanCodec` function. That number codec will then be used to encode and decode the values `0` and `1` accordingly.
+你可以通过提供显式数字 codec 作为 `getBooleanCodec` 函数的 `size` 选项来配置该行为。然后，该数字 codec 将用于相应地编码和解码值 `0` 和 `1`。
 
 ```ts twoslash
 import { getBooleanCodec, getU16Codec, getU32Codec } from "@solana/kit";
@@ -1620,11 +1537,11 @@ getBooleanCodec({ size: getU32Codec() }).encode(false); // 0x00000000
 getBooleanCodec({ size: getU32Codec() }).encode(true); // 0x01000000
 ```
 
-`getBooleanEncoder` and `getBooleanDecoder` functions are also available.
+`getBooleanEncoder` 和 `getBooleanDecoder` 函数也可用。
 
 ### getBytesCodec [!toc] [#get-bytes-codec]
 
-The `getBytesCodec` function returns a `Codec<Uint8Array>` meaning it converts `Uint8Arrays` to and from… `Uint8Arrays`! Whilst this might seem a bit useless, it can be useful when composed into other codecs. For example, you could use it in a struct codec to say that a particular field should be left unserialised.
+`getBytesCodec` 函数返回一个 `Codec<Uint8Array>`，这意味着它在 `Uint8Arrays` 之间进行转换！虽然这可能看起来有点没用，但当它被组合到其他 codec 中时可能会很有用。例如，你可以在 struct codec 中使用它来说明某个特定字段应该保持不序列化。
 
 ```ts twoslash
 import { getBytesCodec } from "@solana/kit";
@@ -1634,7 +1551,7 @@ const bytes = codec.encode(new Uint8Array([42])); // 0x2a
 const value = codec.decode(bytes); // 0x2a
 ```
 
-The `getBytesCodec` function will encode and decode `Uint8Arrays` using as many bytes as necessary. If you'd like to restrict the number of bytes used by this codec, you may combine it with utilities such as [`fixCodecSize`](#fix-codec-size), [`addCodecSizePrefix`](#add-codec-size-prefix) or [`addCodecSentinel`](#add-codec-sentinel).
+`getBytesCodec` 函数将使用尽可能多的字节来编码和解码 `Uint8Arrays`。如果你想限制此 codec 使用的字节数，你可以将其与诸如 [`fixCodecSize`](#fix-codec-size)，[`addCodecSizePrefix`](#add-codec-size-prefix) 或 [`addCodecSentinel`](#add-codec-sentinel) 等实用程序结合使用。
 
 ```ts twoslash
 import { getBytesCodec, fixCodecSize, addCodecSizePrefix, getU32Codec, addCodecSentinel } from "@solana/kit";
@@ -1646,20 +1563,20 @@ fixCodecSize(getBytesCodec(), 4).encode(value);
 
 addCodecSizePrefix(getBytesCodec(), getU32Codec()).encode(value);
 // 0x020000002a2b
-//   |       └-- The 2 bytes of content.
-//   └-- 4-byte prefix telling us to read 2 bytes.
+//   |       └-- 内容的 2 个字节。
+//   └-- 4 字节前缀告诉我们要读取 2 个字节。
 
 addCodecSentinel(getBytesCodec(), new Uint8Array([0xff, 0xff])).encode(value);
 // 0x2a2bffff
-//   |   └-- The sentinel signaling the end of the content.
-//   └-- The 2 bytes of content.
+//   |   └-- 发出内容结束信号的 sentinel。
+//   └-- 内容的 2 个字节。
 ```
 
-`getBytesEncoder` and `getBytesDecoder` functions are also available.
+`getBytesEncoder` 和 `getBytesDecoder` 函数也可用。
 
 ### getConstantCodec [!toc] [#get-constant-codec]
 
-The `getConstantCodec` function accepts any `Uint8Array` and returns a `Codec<void>`. When encoding, it will set the provided `Uint8Array` as-is. When decoding, it will assert that the next bytes contain the provided `Uint8Array` and move the offset forward.
+`getConstantCodec` 函数接受任何 `Uint8Array` 并返回一个 `Codec<void>`。编码时，它将按原样设置提供的 `Uint8Array`。解码时，它将断言下一个字节包含提供的 `Uint8Array` 并向前移动偏移量。
 
 ```ts twoslash
 import { getConstantCodec } from "@solana/kit";
@@ -1671,32 +1588,32 @@ codec.decode(new Uint8Array([1, 2, 3])); // undefined
 codec.decode(new Uint8Array([1, 2, 4])); // Throws an error.
 ```
 
-`getConstantEncoder` and `getConstantDecoder` functions are also available.
+`getConstantEncoder` and `getConstantDecoder` 函数也是可用的。
 
 ### getDiscriminatedUnionCodec [!toc] [#get-discriminated-union-codec]
 
-In Rust, enums are powerful data types whose variants can be one of the following:
+在 Rust 中，枚举是强大的数据类型，其变体可以是以下之一：
 
-- An empty variant — e.g. `enum Message { Quit }`.
-- A tuple variant — e.g. `enum Message { Write(String) }`.
-- A struct variant — e.g. `enum Message { Move { x: i32, y: i32 } }`.
+- 一个空的变体 — 例如 `enum Message { Quit }`。
+- 一个元组变体 — 例如 `enum Message { Write(String) }`。
+- 一个结构体变体 — 例如 `enum Message { Move { x: i32, y: i32 } }`。
 
-Whilst we do not have such powerful enums in JavaScript, we can emulate them in TypeScript using a union of objects such that each object is differentiated by a specific field. **We call this a discriminated union**.
+虽然我们在 JavaScript 中没有这么强大的枚举，但我们可以使用对象的联合在 TypeScript 中模拟它们，这样每个对象都由一个特定的字段区分。**我们称之为可区分联合**。
 
-We use a special field named `__kind` to distinguish between the different variants of a discriminated union. Additionally, since all variants are objects, we can use a `fields` property to wrap the array of tuple variants. Here is an example.
+我们使用一个名为 `__kind` 的特殊字段来区分可区分联合的不同变体。此外，由于所有变体都是对象，我们可以使用 `fields` 属性来包装元组变体的数组。这是一个例子。
 
 ```ts twoslash
 type Message =
-  | { __kind: "quit" } // Empty variant.
-  | { __kind: "write"; fields: [string] } // Tuple variant.
-  | { __kind: "move"; x: number; y: number }; // Struct variant.
+  | { __kind: "quit" } // 空的变体.
+  | { __kind: "write"; fields: [string] } // 元组变体.
+  | { __kind: "move"; x: number; y: number }; // 结构体变体.
 ```
 
-The `getDiscriminatedUnionCodec` function helps us encode and decode these discriminated unions.
+`getDiscriminatedUnionCodec` 函数帮助我们编码和解码这些可区分联合。
 
-It requires the discriminator and codec of each variant as a first argument. Similarly to the [getStructCodec](#get-struct-codec), these are defined as an array of variant tuples where the first item is the discriminator of the variant and the second item is its codec. Since empty variants do not have data to encode, they simply use the [getUnitCodec](#get-unit-codec) which does nothing.
+它需要鉴别器和每个变体的 codec 作为第一个参数。与 [getStructCodec](#get-struct-codec) 类似，这些定义为变体元组的数组，其中第一个项目是变体的鉴别器，第二个项目是它的 codec。由于空的变体没有要编码的数据，因此它们只使用不执行任何操作的 [getUnitCodec](#get-unit-codec)。
 
-Here is how we can create a discriminated union codec for our previous example.
+这是我们如何为先前的示例创建可区分联合 codec。
 
 ```ts twoslash
 import {
@@ -1711,13 +1628,13 @@ import {
 } from "@solana/kit";
 // ---cut-before---
 const messageCodec = getDiscriminatedUnionCodec([
-  // Empty variant.
+  // 空的变体.
   ["quit", getUnitCodec()],
 
-  // Tuple variant.
+  // 元组变体.
   ["write", getStructCodec([["fields", getTupleCodec([addCodecSizePrefix(getUtf8Codec(), getU32Codec())])]])],
 
-  // Struct variant.
+  // 结构体变体.
   [
     "move",
     getStructCodec([
@@ -1728,7 +1645,7 @@ const messageCodec = getDiscriminatedUnionCodec([
 ]);
 ```
 
-And here's how we can use such a codec to encode discriminated unions. Notice that by default, they use a `u8` number prefix to distinguish between the different types of variants.
+这是我们如何使用这样的 codec 来编码可区分联合。请注意，默认情况下，它们使用 `u8` 数字前缀来区分不同类型的变体。
 
 ```ts twoslash
 import {
@@ -1742,13 +1659,13 @@ import {
   getI32Codec,
 } from "@solana/kit";
 const messageCodec = getDiscriminatedUnionCodec([
-  // Empty variant.
+  // 空的变体.
   ["quit", getUnitCodec()],
 
-  // Tuple variant.
+  // 元组变体.
   ["write", getStructCodec([["fields", getTupleCodec([addCodecSizePrefix(getUtf8Codec(), getU32Codec())])]])],
 
-  // Struct variant.
+  // 结构体变体.
   [
     "move",
     getStructCodec([
@@ -1760,22 +1677,22 @@ const messageCodec = getDiscriminatedUnionCodec([
 // ---cut-before---
 messageCodec.encode({ __kind: "quit" });
 // 0x00
-//   └-- 1-byte discriminator (Index 0 — the "quit" variant).
+//   └-- 1-字节鉴别器 (索引 0 — "quit" 变体).
 
 messageCodec.encode({ __kind: "write", fields: ["Hi"] });
 // 0x01020000004869
-//   | |       └-- utf8 string content ("Hi").
-//   | └-- u32 string prefix (2 characters).
-//   └-- 1-byte discriminator (Index 1 — the "write" variant).
+//   | |       └-- utf8 字符串内容 ("Hi").
+//   | └-- u32 字符串前缀 (2 characters).
+//   └-- 1-字节鉴别器 (索引 1 — "write" 变体).
 
 messageCodec.encode({ __kind: "move", x: 5, y: 6 });
 // 0x020500000006000000
-//   | |       └-- Field y (6).
-//   | └-- Field x (5).
-//   └-- 1-byte discriminator (Index 2 — the "move" variant).
+//   | |       └-- 字段 y (6).
+//   | └-- 字段 x (5).
+//   └-- 1-字节鉴别器 (索引 2 — "move" 变体).
 ```
 
-However, you may provide a number codec as the `size` option of the `getDiscriminatedUnionCodec` function to customise that behaviour.
+但是，你可以提供一个数字 codec 作为 `getDiscriminatedUnionCodec` 函数的 `size` 选项来自定义该行为。
 
 ```ts twoslash
 import {
@@ -1806,18 +1723,18 @@ const u32MessageCodec = getDiscriminatedUnionCodec(
 
 u32MessageCodec.encode({ __kind: "quit" });
 // 0x00000000
-//   └------┘ 4-byte discriminator (Index 0).
+//   └------┘ 4-字节鉴别器 (索引 0).
 
 u32MessageCodec.encode({ __kind: "write", fields: ["Hi"] });
 // 0x01000000020000004869
-//   └------┘ 4-byte discriminator (Index 1).
+//   └------┘ 4-字节鉴别器 (索引 1).
 
 u32MessageCodec.encode({ __kind: "move", x: 5, y: 6 });
 // 0x020000000500000006000000
-//   └------┘ 4-byte discriminator (Index 2).
+//   └------┘ 4-字节鉴别器 (索引 2).
 ```
 
-You may also customize the discriminator property — which defaults to `__kind` — by providing the desired property name as the `discriminator` option like so:
+你还可以自定义鉴别器属性（默认为 `__kind`），方法是将所需的属性名称作为 `discriminator` 选项提供，如下所示：
 
 ```ts twoslash
 import {
@@ -1851,7 +1768,7 @@ messageCodec.encode({ message: "write", fields: ["Hi"] });
 messageCodec.encode({ message: "move", x: 5, y: 6 });
 ```
 
-Note that, the discriminator value of a variant may be any scalar value — such as `number`, `bigint`, `boolean`, a JavaScript `enum`, etc. For instance, the following is also valid:
+请注意，变体的鉴别器值可以是任何标量值 - 例如 `number`、`bigint`、`boolean`、JavaScript `enum` 等。 例如，以下内容也是有效的：
 
 ```ts twoslash
 import {
@@ -1887,11 +1804,11 @@ messageCodec.encode({ __kind: Message.Write, fields: ["Hi"] });
 messageCodec.encode({ __kind: Message.Move, x: 5, y: 6 });
 ```
 
-`getDiscriminatedUnionEncoder` and `getDiscriminatedUnionDecoder` functions are also available.
+`getDiscriminatedUnionEncoder` 和 `getDiscriminatedUnionDecoder` 函数也可用。
 
 ### getEnumCodec [!toc] [#get-enum-codec]
 
-The `getEnumCodec` function accepts a JavaScript enum constructor and returns a codec for encoding and decoding values of that enum.
+`getEnumCodec` 函数接受一个 JavaScript 枚举构造函数，并返回一个用于编码和解码该枚举值的 codec。
 
 ```ts twoslash
 import { getEnumCodec } from "@solana/kit";
@@ -1906,7 +1823,7 @@ const bytes = codec.encode(Direction.Left); // 0x00
 const direction = codec.decode(bytes); // Direction.Left
 ```
 
-When encoding an enum, you may either provide the value of the enum variant — e.g. `Direction.Left` — or its key — e.g. `'Left'`.
+在编码枚举时，你可以提供枚举变量的值 - 例如 `Direction.Left` - 或它的键 - 例如 `'Left'`。
 
 ```ts twoslash
 import { getEnumCodec } from "@solana/kit";
@@ -1921,7 +1838,7 @@ getEnumCodec(Direction).encode("Left"); // 0x00
 getEnumCodec(Direction).encode("Right"); // 0x01
 ```
 
-By default, a `u8` number is being used to store the enum value. However, a number codec may be passed as the `size` option to configure that behaviour.
+默认情况下，使用 `u8` 数字来存储枚举值。 但是，可以将数字 codec 作为 `size` 选项传递以配置该行为。
 
 ```ts twoslash
 import { getEnumCodec, getU32Codec } from "@solana/kit";
@@ -1935,7 +1852,7 @@ u32DirectionCodec.encode(Direction.Left); // 0x00000000
 u32DirectionCodec.encode(Direction.Right); // 0x01000000
 ```
 
-This function also works with lexical enums — e.g. `enum Direction { Left = '←' }` — explicit numerical enums — e.g. `enum Speed { Left = 50 }` — and hybrid enums with a mix of both.
+此函数还适用于词法枚举 - 例如 `enum Direction { Left = '←' }` - 显式数值枚举 - 例如 `enum Speed { Left = 50 }` - 以及混合了这两种枚举的混合枚举。
 
 ```ts twoslash
 import { getEnumCodec } from "@solana/kit";
@@ -1957,9 +1874,9 @@ getEnumCodec(Numbers).encode("Six"); // 0x02
 getEnumCodec(Numbers).encode("Nine"); // 0x03
 ```
 
-Notice how, by default, the index of the enum variant is used to encode the value of the enum. For instance, in the example above, `Numbers.Five` is encoded as `0x01` even though its value is `5`. This is also true for lexical enums.
+请注意，默认情况下，枚举变量的索引用于编码枚举的值。 例如，在上面的示例中，`Numbers.Five` 被编码为 `0x01`，即使它的值是 `5`。对于词法枚举也是如此。
 
-However, when dealing with numerical enums that have explicit values, you may use the `useValuesAsDiscriminators` option to encode the value of the enum variant instead of its index.
+但是，当处理具有显式值的数值枚举时，你可以使用 `useValuesAsDiscriminators` 选项来编码枚举变量的值，而不是它的索引。
 
 ```ts twoslash
 import { getEnumCodec } from "@solana/kit";
@@ -1982,7 +1899,7 @@ codec.encode("Six"); // 0x06
 codec.encode("Nine"); // 0x09
 ```
 
-Note that when using the `useValuesAsDiscriminators` option on an enum that contains a lexical value, an error will be thrown.
+请注意，当在包含词法值的枚举上使用 `useValuesAsDiscriminators` 选项时，将引发错误。
 
 ```ts twoslash
 import { getEnumCodec } from "@solana/kit";
@@ -1994,13 +1911,13 @@ enum Lexical {
 getEnumCodec(Lexical, { useValuesAsDiscriminators: true }); // Throws an error.
 ```
 
-`getEnumEncoder` and `getEnumDecoder` functions are also available.
+`getEnumEncoder` and `getEnumDecoder` 函数也是可用的。
 
 ### getHiddenPrefixCodec [!toc] [#get-hidden-prefix-codec]
 
-The `getHiddenPrefixCodec` function allow us to prepend a list of hidden `Codec<void>` to a given codec.
+`getHiddenPrefixCodec` 函数允许我们将隐藏的 `Codec<void>` 列表预先添加到给定的 codec。
 
-When encoding, the hidden codecs will be encoded before the main codec and the offset will be moved accordingly. When decoding, the hidden codecs will be decoded but only the result of the main codec will be returned. This is particularly helpful when creating data structures that include constant values that should not be included in the final type.
+编码时，隐藏的 codec 将在主 codec 之前编码，并且偏移量将相应地移动。 解码时，将解码隐藏的 codec，但仅返回主 codec 的结果。 当创建包含不应包含在最终类型中的常量值的数据结构时，这特别有用。
 
 ```ts twoslash
 import { getHiddenPrefixCodec, getConstantCodec, getU16Codec } from "@solana/kit";
@@ -2012,20 +1929,20 @@ const codec = getHiddenPrefixCodec(getU16Codec(), [
 
 codec.encode(42);
 // 0x0102030405062a00
-//   |     |     └-- Our main u16 codec (value = 42).
-//   |     └-- Our second hidden prefix codec.
-//   └-- Our first hidden prefix codec.
+//   |     |     └-- 我们的主 u16 codec (value = 42).
+//   |     └-- 我们的第二个隐藏前缀 codec.
+//   └-- 我们的第一个隐藏前缀 codec.
 
 codec.decode(new Uint8Array([1, 2, 3, 4, 5, 6, 42, 0])); // 42
 ```
 
-`getHiddenPrefixEncoder` and `getHiddenPrefixDecoder` functions are also available.
+`getHiddenPrefixEncoder` 和 `getHiddenPrefixDecoder` 函数也可用。
 
 ### getHiddenSuffixCodec [!toc] [#get-hidden-suffix-codec]
 
-The `getHiddenSuffixCodec` function allow us to append a list of hidden `Codec<void>` to a given codec.
+`getHiddenSuffixCodec` 函数允许我们将隐藏的 `Codec<void>` 列表附加到给定的 codec。
 
-When encoding, the hidden codecs will be encoded after the main codec and the offset will be moved accordingly. When decoding, the hidden codecs will be decoded but only the result of the main codec will be returned. This is particularly helpful when creating data structures that include constant values that should not be included in the final type.
+编码时，隐藏的 codec 将在主 codec 之后编码，并且偏移量将相应地移动。 解码时，将解码隐藏的 codec，但仅返回主 codec 的结果。 当创建包含不应包含在最终类型中的常量值的数据结构时，这特别有用。
 
 ```ts twoslash
 import { getHiddenSuffixCodec, getConstantCodec, getU16Codec } from "@solana/kit";
@@ -2037,18 +1954,18 @@ const codec = getHiddenSuffixCodec(getU16Codec(), [
 
 codec.encode(42);
 // 0x2a00010203040506
-//   |   |     └-- Our second hidden suffix codec.
-//   |   └-- Our first hidden suffix codec.
-//   └-- Our main u16 codec (value = 42).
+//   |   |     └-- 我们的第二个隐藏后缀 codec.
+//   |   └-- 我们的第一个隐藏后缀 codec.
+//   └-- 我们的主 u16 codec (value = 42).
 
 codec.decode(new Uint8Array([42, 0, 1, 2, 3, 4, 5, 6])); // 42
 ```
 
-`getHiddenSuffixEncoder` and `getHiddenSuffixDecoder` functions are also available.
+`getHiddenSuffixEncoder` 和 `getHiddenSuffixDecoder` 函数也可用。
 
 ### getLiteralUnionCodec [!toc] [#get-literal-union-codec]
 
-The `getLiteralUnionCodec` function accepts an array of literal values — such as `string`, `number`, `boolean`, etc. — and returns a codec that encodes and decodes such values by using their index in the array. It uses TypeScript unions to represent all the possible values.
+`getLiteralUnionCodec` 函数接受文字值数组 - 例如 `string`、`number`、`boolean` 等 - 并返回一个通过使用它们在数组中的索引来编码和解码这些值的 codec。 它使用 TypeScript 联合来表示所有可能的值。
 
 ```ts twoslash
 import { getLiteralUnionCodec, FixedSizeCodec } from "@solana/kit";
@@ -2060,7 +1977,7 @@ const bytes = codec.encode("left"); // 0x00
 const value = codec.decode(bytes); // 'left'
 ```
 
-It uses a `u8` number by default to store the index of the value. However, you may provide a number codec as the `size` option of the `getLiteralUnionCodec` function to customise that behaviour.
+默认情况下，它使用一个 `u8` 数字来存储值的索引。 但是，你可以提供一个数字 codec 作为 `getLiteralUnionCodec` 函数的 `size` 选项来自定义该行为。
 
 ```ts twoslash
 import { getLiteralUnionCodec, getU32Codec } from "@solana/kit";
@@ -2075,11 +1992,11 @@ codec.encode("up"); // 0x02000000
 codec.encode("down"); // 0x03000000
 ```
 
-`getLiteralUnionEncoder` and `getLiteralUnionDecoder` functions are also available.
+`getLiteralUnionEncoder` 和 `getLiteralUnionDecoder` 函数也可用。
 
 ### getMapCodec [!toc] [#get-map-codec]
 
-The `getMapCodec` function accepts two codecs of type `K` and `V` and returns a codec of type `Map<K, V>`.
+`getMapCodec` 函数接受 `K` 和 `V` 类型的两个 codec，并返回 `Map<K, V>` 类型的 codec。
 
 ```ts twoslash
 import { getMapCodec, getU8Codec, getUtf8Codec, fixCodecSize } from "@solana/kit";
@@ -2092,7 +2009,7 @@ const bytes = codec.encode(new Map([["alice", 42]])); // 0x01000000616c696365000
 const map = codec.decode(bytes); // new Map([["alice", 42]])
 ```
 
-Each entry (key/value pair) is encoded one after the other with the key first and the value next. By default, the size of the map is stored as a `u32` prefix before encoding the entries.
+每个条目（键/值对）一个接一个地编码，先编码键，再编码值。 默认情况下，map 的大小以 `u32` 前缀的形式存储，然后再编码条目。
 
 ```ts twoslash
 import { getMapCodec, getU8Codec, getUtf8Codec, fixCodecSize } from "@solana/kit";
@@ -2104,71 +2021,28 @@ myMap.set("bob", 5);
 
 codec.encode(myMap);
 // 0x02000000616c6963650000002a626f62000000000005
-//   |       |               | |               └-- 2nd entry value (5).
-//   |       |               | └-- 2nd entry key ("bob").
-//   |       |               └-- 1st entry value (42).
-//   |       └-- 1st entry key ("alice").
-//   └-- 4-byte prefix telling us to read 2 map entries.
+//   |       |               | |               └-- 第 2 个条目值 (5).
+//   |       |               | └-- 第 2 个条目键 ("bob").
+//   |       |               └-- 第 1 个条目值 (42).
+//   |       └-- 第 1 个条目键 ("alice").
+//   └-- 4 字节前缀告诉我们要读取 2 个 map 条目。
 ```
 
-However, you may use the `size` option to configure this behaviour. It can be one of the following three strategies:
+但是，你可以使用 `size` 选项来配置此行为。 它可以是以下三种策略之一：
 
-- `Codec<number>`: When a number codec is provided, that codec will be used to encode and decode the size prefix.
-- `number`: When a number is provided, the codec will expect a fixed number of entries in the map. An error will be thrown when trying to encode a map of a different length.
-- `"remainder"`: When the string `"remainder"` is passed as a size, the codec will use the remainder of the bytes to encode/decode its entries. This means the size is not stored or known in advance but simply inferred from the rest of the buffer. For instance, if we have a map of `u16` numbers and 10 bytes remaining, we know there are 5 entries in this map.
-
-```ts twoslash
-import { getMapCodec, getU8Codec, getU16Codec, fixCodecSize, getUtf8Codec } from "@solana/kit";
-// ---cut-before---
-const keyCodec = fixCodecSize(getUtf8Codec(), 8);
-const valueCodec = getU8Codec();
-
-const myMap = new Map<string, number>();
-myMap.set("alice", 42);
-myMap.set("bob", 5);
-
-getMapCodec(keyCodec, valueCodec, { size: getU16Codec() }).encode(myMap);
-// 0x0200616c6963650000002a626f62000000000005
-//   |   |                 └-- Second entry.
-//   |   └-- First entry.
-//   └-- 2-byte prefix telling us to read 2 entries.
-
-getMapCodec(keyCodec, valueCodec, { size: 3 }).encode(myMap);
-// 0x616c6963650000002a626f62000000000005
-//   |                 └-- Second entry.
-//   └-- First entry.
-// There must always be 2 entries in the map.
-
-getMapCodec(keyCodec, valueCodec, { size: "remainder" }).encode(myMap);
-// 0x616c6963650000002a626f62000000000005
-//   |                 └-- Second entry.
-//   └-- First entry.
-// The size is inferred from the remainder of the bytes.
-```
-
-`getMapEncoder` and `getMapDecoder` functions are also available.
-
-### getNullableCodec [!toc] [#get-nullable-codec]
-
-The `getNullableCodec` function accepts a codec of type `T` and returns a codec of type `T | null`. It stores whether or not the item exists as a boolean prefix using a `u8` by default.
+- `Codec<number>`：当提供数字 codec 时，该 codec 将用于编码和解码大小前缀。
+- `number`：当提供数字时，该 codec 将期望 map 中具有固定数量的条目。 当尝试编码长度不同的 map 时，将引发错误。
+- `"remainder"`：当字符串 `"remainder"` 作为大小传递时，该 codec 将使用剩余的字节来编码/解码其条目。 这意味着大小不会被存储或提前知道，而是简单地从缓冲区的其余部分推断出来。 例如，如果我们有一个 `u16` 数字 map 并剩下 10 个字节，我们就知道该 map 中有 5 个条目。
 
 ```ts twoslash
-import { getNullableCodec, getU32Codec, addCodecSizePrefix, getUtf8Codec } from "@solana/kit";
-// ---cut-before---
-const stringCodec = addCodecSizePrefix(getUtf8Codec(), getU32Codec());
-
-getNullableCodec(stringCodec).encode("Hi");
-// 0x01020000004869
-//   | |       └-- utf8 string content ("Hi").
-//   | └-- u32 string prefix (2 characters).
-//   └-- 1-byte prefix (true — The item exists).
-
+import { getMapCodec, getU8Codec, getU16Codec```mdx
 getNullableCodec(stringCodec).encode(null);
 // 0x00
 //   └-- 1-byte prefix (false — The item is null).
+//   └-- 1 字节前缀 (false — 该项为空).
 ```
 
-You may provide a number codec as the `prefix` option of the `getNullableCodec` function to configure how to store the boolean prefix.
+你可以提供一个数字 codec 作为 `getNullableCodec` 函数的 `prefix` 选项，以配置如何存储布尔前缀。
 
 ```ts twoslash
 import { getNullableCodec, getU32Codec, addCodecSizePrefix, getUtf8Codec } from "@solana/kit";
@@ -2181,13 +2055,15 @@ const u32NullableStringCodec = getNullableCodec(stringCodec, {
 u32NullableStringCodec.encode("Hi");
 // 0x01000000020000004869
 //   └------┘ 4-byte prefix (true).
+//   └------┘ 4 字节前缀 (true)。
 
 u32NullableStringCodec.encode(null);
 // 0x00000000
 //   └------┘ 4-byte prefix (false).
+//   └------┘ 4 字节前缀 (false)。
 ```
 
-Additionally, if the item is a `FixedSizeCodec`, you may set the `noneValue` option to `"zeroes"` to also make the returned nullable codec a `FixedSizeCodec`. To do so, it will pad `null` values with zeroes to match the length of existing values.
+此外，如果该项是 `FixedSizeCodec`，您可以将 `noneValue` 选项设置为 `"zeroes"`，使返回的可空 codec 也成为 `FixedSizeCodec`。为此，它将用零填充 `null` 值，以匹配现有值的长度。
 
 ```ts twoslash
 import { getNullableCodec, fixCodecSize, getUtf8Codec } from "@solana/kit";
@@ -2200,41 +2076,51 @@ const fixedNullableStringCodec = getNullableCodec(
 fixedNullableStringCodec.encode("Hi");
 // 0x014869000000000000
 //   | └-- 8-byte utf8 string content ("Hi").
+//   | └-- 8 字节 utf8 字符串内容 ("Hi")。
 //   └-- 1-byte prefix (true — The item exists).
+//   └-- 1 字节前缀 (true — 该项存在)。
 
 fixedNullableStringCodec.encode(null);
 // 0x000000000000000000
 //   | └-- 8-byte of padding to make a fixed-size codec.
+//   | └-- 8 字节填充以创建一个固定大小的 codec。
 //   └-- 1-byte prefix (false — The item is null).
+//   └-- 1 字节前缀 (false — 该项为空)。
 ```
 
-The `noneValue` option can also be set to an explicit byte array to use as the padding for `null` values. Note that, in this case, the returned codec will not be a `FixedSizeCodec` as the byte array representing `null` values may be of any length.
+`noneValue` 选项也可以设置为显式字节数组，以用作 `null` 值的填充。请注意，在这种情况下，返回的 codec 将不是 `FixedSizeCodec`，因为表示 `null` 值的字节数组可以是任何长度。
 
 ```ts twoslash
 import { getNullableCodec, getUtf8Codec } from "@solana/kit";
 // ---cut-before---
 const codec = getNullableCodec(getUtf8Codec(), {
   noneValue: new Uint8Array([255]), // 0xff means null.
+  noneValue: new Uint8Array([255]), // 0xff 表示 null。
 });
 
 codec.encode("Hi");
 // 0x014869
 //   | └-- 2-byte utf8 string content ("Hi").
+//   | └-- 2 字节 utf8 字符串内容 ("Hi")。
 //   └-- 1-byte prefix (true — The item exists).
+//   └-- 1 字节前缀 (true — 该项存在)。
 
 codec.encode(null);
 // 0x00ff
 //   | └-- 1-byte representing null (0xff).
+//   | └-- 1 字节表示 null (0xff)。
 //   └-- 1-byte prefix (false — The item is null).
+//   └-- 1 字节前缀 (false — 该项为空)。
 ```
 
-The `prefix` option of the `getNullableCodec` function can also be set to `null`, meaning no prefix will be used to determine whether the item exists. In this case, the codec will rely on the `noneValue` option to determine whether the item is `null`.
+`getNullableCodec` 函数的 `prefix` 选项也可以设置为 `null`，这意味着不会使用前缀来确定该项是否存在。在这种情况下，codec 将依赖 `noneValue` 选项来确定该项是否为 `null`。
 
 ```ts twoslash
 import { getNullableCodec, getU16Codec } from "@solana/kit";
 // ---cut-before---
 const codecWithZeroNoneValue = getNullableCodec(getU16Codec(), {
   noneValue: "zeroes", // 0x0000 means null.
+  noneValue: "zeroes", // 0x0000 表示 null。
   prefix: null,
 });
 codecWithZeroNoneValue.encode(42); // 0x2a00
@@ -2242,13 +2128,14 @@ codecWithZeroNoneValue.encode(null); // 0x0000
 
 const codecWithCustomNoneValue = getNullableCodec(getU16Codec(), {
   noneValue: new Uint8Array([255]), // 0xff means null.
+  noneValue: new Uint8Array([255]), // 0xff 表示 null。
   prefix: null,
 });
 codecWithCustomNoneValue.encode(42); // 0x2a00
 codecWithCustomNoneValue.encode(null); // 0xff
 ```
 
-Note that if `prefix` is set to `null` and no `noneValue` is provided, the codec assumes that the item exists if and only if some remaining bytes are available to decode. This could be useful to describe data structures that may or may not have additional data to the end of the buffer.
+请注意，如果 `prefix` 设置为 `null` 并且没有提供 `noneValue`，则 codec 假定该项存在，当且仅当有一些剩余字节可用于解码时。这对于描述可能在缓冲区末尾有或没有附加数据的数据结构很有用。
 
 ```ts
 const codec = getNullableCodec(getU16Codec(), { prefix: null });
@@ -2258,7 +2145,7 @@ codec.decode(new Uint8Array([42, 0])); // 42
 codec.decode(new Uint8Array([])); // null
 ```
 
-To recap, here are all the possible configurations of the `getNullableCodec` function, using a `u16` codec as an example.
+总而言之，以下是 `getNullableCodec` 函数的所有可能配置，以 `u16` codec 为例。
 
 | `encode(42)` / `encode(null)` | No `noneValue` (default) | `noneValue: "zeroes"`       | Custom `noneValue` (`0xff`) |
 | ----------------------------- | ------------------------ | --------------------------- | --------------------------- |
@@ -2266,15 +2153,15 @@ To recap, here are all the possible configurations of the `getNullableCodec` fun
 | Custom `prefix` (`u16`)       | `0x01002a00` / `0x0000`  | `0x01002a00` / `0x00000000` | `0x01002a00` / `0x0000ff`   |
 | No `prefix`                   | `0x2a00` / `0x`          | `0x2a00` / `0x0000`         | `0x2a00` / `0xff`           |
 
-Note that you might be interested in the Rust-like alternative version of nullable codecs, available as the [getOptionCodec](#get-option-codec) function.
+请注意，您可能对可空 code 的 Rust 风格的替代版本感兴趣，该版本可用作 [getOptionCodec](#get-option-codec) 函数。
 
-`getNullableEncoder` and `getNullableDecoder` functions are also available.
+`getNullableEncoder` 和 `getNullableDecoder` 函数也可用。
 
 ### getOptionCodec [!toc] [#get-option-codec]
 
-The `getOptionCodec` function accepts a codec of type `T` and returns a codec of type `Option<T>` — as defined in the [`@solana/options`](https://github.com/anza-xyz/kit/tree/main/packages/options) package. Note that, when encoding, `T` or `null` may also be provided directly as input and will be interpreted as `Some(T)` or `None` respectively. However, when decoding, the output will always be an `Option<T>` type.
+`getOptionCodec` 函数接受类型为 `T` 的 codec，并返回类型为 `Option<T>` 的 codec — 如 [`@solana/options`](https://github.com/anza-xyz/kit/tree/main/packages/options) 包中定义的那样。请注意，在编码时，也可以直接提供 `T` 或 `null` 作为输入，并将分别解释为 `Some(T)` 或 `None`。但是，在解码时，输出将始终为 `Option<T>` 类型。
 
-It stores whether or not the item exists as a boolean prefix using a `u8` by default.
+默认情况下，它使用 `u8` 将该项是否存在存储为布尔前缀。
 
 ```ts twoslash
 import { getOptionCodec, getU32Codec, addCodecSizePrefix, getUtf8Codec, some, none } from "@solana/kit";
@@ -2285,16 +2172,20 @@ getOptionCodec(stringCodec).encode("Hi");
 getOptionCodec(stringCodec).encode(some("Hi"));
 // 0x01020000004869
 //   | |       └-- utf8 string content ("Hi").
+//   | |       └-- utf8 字符串内容 ("Hi")。
 //   | └-- u32 string prefix (2 characters).
+//   | └-- u32 字符串前缀（2 个字符）。
 //   └-- 1-byte prefix (Some).
+//   └-- 1 字节前缀 (Some)。
 
 getOptionCodec(stringCodec).encode(null);
 getOptionCodec(stringCodec).encode(none());
 // 0x00
 //   └-- 1-byte prefix (None).
+//   └-- 1 字节前缀 (None)。
 ```
 
-You may provide a number codec as the `prefix` option of the `getOptionCodec` function to configure how to store the boolean prefix.
+您可以提供一个数字 codec 作为 `getOptionCodec` 函数的 `prefix` 选项，以配置如何储存布尔前缀。
 
 ```ts twoslash
 import { getOptionCodec, getU32Codec, addCodecSizePrefix, getUtf8Codec, some, none } from "@solana/kit";
@@ -2307,13 +2198,15 @@ const u32OptionStringCodec = getOptionCodec(stringCodec, {
 u32OptionStringCodec.encode(some("Hi"));
 // 0x01000000020000004869
 //   └------┘ 4-byte prefix (Some).
+//   └------┘ 4 字节前缀 (Some)。
 
 u32OptionStringCodec.encode(none());
 // 0x00000000
 //   └------┘ 4-byte prefix (None).
+//   └------┘ 4 字节前缀 (None)。
 ```
 
-Additionally, if the item is a `FixedSizeCodec`, you may set the `noneValue` option to `"zeroes"` to also make the returned Option codec a `FixedSizeCodec`. To do so, it will pad `None` values with zeroes to match the length of existing values.
+此外，如果该项是 `FixedSizeCodec`，您可以将 `noneValue` 选项设置为 `"zeroes"`，以使返回的 Option codec 也成为 `FixedSizeCodec`。为此，它将用零填充 `None` 值，以匹配现有值的长度。
 
 ```ts twoslash
 import { getOptionCodec, fixCodecSize, getUtf8Codec, some, none } from "@solana/kit";
@@ -2326,41 +2219,51 @@ const codec = getOptionCodec(
 codec.encode(some("Hi"));
 // 0x014869000000000000
 //   | └-- 8-byte utf8 string content ("Hi").
+//   | └-- 8 字节 utf8 字符串内容 ("Hi")。
 //   └-- 1-byte prefix (Some).
+//   └-- 1 字节前缀 (Some)。
 
 codec.encode(none());
 // 0x000000000000000000
 //   | └-- 8-byte of padding to make a fixed-size codec.
+//   | └-- 8 字节填充以创建一个固定大小的 codec。
 //   └-- 1-byte prefix (None).
+//   └-- 1 字节前缀 (None)。
 ```
 
-The `noneValue` option can also be set to an explicit byte array to use as the padding for `None` values. Note that, in this case, the returned codec will not be a `FixedSizeCodec` as the byte array representing `None` values may be of any length.
+`noneValue` 选项也可以设置为显式字节数组，以用作 `None` 值的填充。请注意，在这种情况下，返回的 codec 将不是 `FixedSizeCodec`，因为表示 `None` 值的字节数组可以是任何长度。
 
 ```ts twoslash
 import { getOptionCodec, getUtf8Codec, some, none } from "@solana/kit";
 // ---cut-before---
 const codec = getOptionCodec(getUtf8Codec(), {
   noneValue: new Uint8Array([255]), // 0xff means None.
+  noneValue: new Uint8Array([255]), // 0xff 表示 None。
 });
 
 codec.encode(some("Hi"));
 // 0x014869
 //   | └-- 2-byte utf8 string content ("Hi").
+//   | └-- 2 字节 utf8 字符串内容 ("Hi")。
 //   └-- 1-byte prefix (Some).
+//   └-- 1 字节前缀 (Some)。
 
 codec.encode(none());
 // 0x00ff
 //   | └-- 1-byte representing None (0xff).
+//   | └-- 1 字节表示 None (0xff)。
 //   └-- 1-byte prefix (None).
+//   └-- 1 字节前缀 (None)。
 ```
 
-The `prefix` option of the `getOptionCodec` function can also be set to `null`, meaning no prefix will be used to determine whether the item exists. In this case, the codec will rely on the `noneValue` option to determine whether the item is `None`.
+`getOptionCodec` 函数的 `prefix` 选项也可以设置为 `null`，这意味着不会使用前缀来确定该项是否存在。在这种情况下，codec 将依赖 `noneValue` 选项来确定该项是否为 `None`。
 
 ```ts twoslash
 import { getOptionCodec, getU16Codec, some, none } from "@solana/kit";
 // ---cut-before---
 const codecWithZeroNoneValue = getOptionCodec(getU16Codec(), {
   noneValue: "zeroes", // 0x0000 means None.
+  noneValue: "zeroes", // 0x0000 表示 None。
   prefix: null,
 });
 codecWithZeroNoneValue.encode(some(42)); // 0x2a00
@@ -2368,13 +2271,14 @@ codecWithZeroNoneValue.encode(none()); // 0x0000
 
 const codecWithCustomNoneValue = getOptionCodec(getU16Codec(), {
   noneValue: new Uint8Array([255]), // 0xff means None.
+  noneValue: new Uint8Array([255]), // 0xff 表示 None。
   prefix: null,
 });
 codecWithCustomNoneValue.encode(some(42)); // 0x2a00
 codecWithCustomNoneValue.encode(none()); // 0xff
 ```
 
-Note that if `prefix` is set to `null` and no `noneValue` is provided, the codec assume that the item exists if and only if some remaining bytes are available to decode. This could be useful to describe data structures that may or may not have additional data to the end of the buffer.
+请注意，如果 `prefix` 设置为 `null` 并且没有提供 `noneValue`，则 codec 假定该项存在，当且仅当有一些剩余字节可用于解码时。这对于描述可能在缓冲区末尾有或没有附加数据的数据结构很有用。
 
 ```ts twoslash
 import { getOptionCodec, getU16Codec, some, none } from "@solana/kit";
@@ -2386,7 +2290,7 @@ codec.decode(new Uint8Array([42, 0])); // some(42)
 codec.decode(new Uint8Array([])); // none()
 ```
 
-To recap, here are all the possible configurations of the `getOptionCodec` function, using a `u16` codec as an example.
+总而言之，以下是 `getOptionCodec` 函数的所有可能配置，以 `u16` codec 为例。
 
 | `encode(some(42))` / `encode(none())` | No `noneValue` (default) | `noneValue: "zeroes"`       | Custom `noneValue` (`0xff`) |
 | ------------------------------------- | ------------------------ | --------------------------- | --------------------------- |
@@ -2394,11 +2298,11 @@ To recap, here are all the possible configurations of the `getOptionCodec` funct
 | Custom `prefix` (`u16`)               | `0x01002a00` / `0x0000`  | `0x01002a00` / `0x00000000` | `0x01002a00` / `0x0000ff`   |
 | No `prefix`                           | `0x2a00` / `0x`          | `0x2a00` / `0x0000`         | `0x2a00` / `0xff`           |
 
-`getOptionEncoder` and `getOptionDecoder` functions are also available.
+`getOptionEncoder` 和 `getOptionDecoder` 函数也可用。
 
 ### getSetCodec [!toc] [#get-set-codec]
 
-The `getSetCodec` function accepts any codec of type `T` and returns a codec of type `Set<T>`.
+`getSetCodec` 函数接受任何类型为 `T` 的 codec，并返回类型为 `Set<T>` 的 codec。
 
 ```ts twoslash
 import { getSetCodec, getU8Codec } from "@solana/kit";
@@ -2408,7 +2312,7 @@ const bytes = codec.encode(new Set([1, 2, 3])); // 0x03000000010203
 const value = codec.decode(bytes); // new Set([1, 2, 3])
 ```
 
-By default, the size of the set is stored as a `u32` prefix before encoding the items.
+默认情况下，集合的大小存储为 `u32` 前缀，然后再对项进行编码。
 
 ```ts twoslash
 import { getSetCodec, getU8Codec } from "@solana/kit";
@@ -2416,14 +2320,16 @@ import { getSetCodec, getU8Codec } from "@solana/kit";
 getSetCodec(getU8Codec()).encode(new Set([1, 2, 3]));
 // 0x03000000010203
 //   |       └-- 3 items of 1 byte each.
+//   |       └-- 每个 1 字节的 3 个项目。
 //   └-- 4-byte prefix telling us to read 3 items.
+//   └-- 4 字节前缀，告诉我们读取 3 个项目。
 ```
 
-However, you may use the `size` option to configure this behaviour. It can be one of the following three strategies:
+但是，您可以使用 `size` 选项来配置此行为。它可以是以下三种策略之一：
 
-- `Codec<number>`: When a number codec is provided, that codec will be used to encode and decode the size prefix.
-- `number`: When a number is provided, the codec will expect a fixed number of items in the set. An error will be thrown when trying to encode a set of a different length.
-- `"remainder"`: When the string `"remainder"` is passed as a size, the codec will use the remainder of the bytes to encode/decode its items. This means the size is not stored or known in advance but simply inferred from the rest of the buffer. For instance, if we have a set of `u16` numbers and 10 bytes remaining, we know there are 5 items in this set.
+- `Codec<number>`：当提供数字 codec 时，该 codec 将用于编码和解码大小前缀。
+- `number`：当提供数字时，该 codec 将期望集合中存在固定数量的项。尝试编码长度不同的集合时，将引发错误。
+- `"remainder"`：当字符串 `"remainder"` 作为大小传递时，该 codec 将使用剩余的字节来编码/解码其项目。这意味着大小不会被存储或预先知道，而只是从缓冲区的其余部分推断出来。例如，如果我们有一个 `u16` 数字集合，并且剩余 10 个字节，我们知道此集合中有 5 个项。
 
 ```ts twoslash
 import { getSetCodec, getU8Codec, getU16Codec } from "@solana/kit";
@@ -2431,22 +2337,26 @@ import { getSetCodec, getU8Codec, getU16Codec } from "@solana/kit";
 getSetCodec(getU8Codec(), { size: getU16Codec() }).encode(new Set([1, 2, 3]));
 // 0x0300010203
 //   |   └-- 3 items of 1 byte each.
+//   |   └-- 每个 1 字节的 3 个项目。
 //   └-- 2-byte prefix telling us to read 3 items.
+//   └-- 2 字节前缀，告诉我们读取 3 个项目。
 
 getSetCodec(getU8Codec(), { size: 3 }).encode(new Set([1, 2, 3]));
 // 0x010203
 //   └-- 3 items of 1 byte each. There must always be 3 items in the set.
+//   └-- 每个 1 字节的 3 个项目。集合中必须始终有 3 个项目。
 
 getSetCodec(getU8Codec(), { size: "remainder" }).encode(new Set([1, 2, 3]));
 // 0x010203
 //   └-- 3 items of 1 byte each. The size is inferred from the remainder of the bytes.
+//   └-- 每个 1 字节的 3 个项目。大小是从剩余字节中推断出来的。
 ```
 
-`getSetEncoder` and `getSetDecoder` functions are also available.
+`getSetEncoder` 和 `getSetDecoder` 函数也可用。
 
 ### getStructCodec [!toc] [#get-struct-codec]
 
-The `getStructCodec` function accepts any number of field codecs and returns a codec for an object containing all these fields. Each provided field is an array such that the first item is the name of the field and the second item is the codec used to encode and decode that field type.
+`getStructCodec` 函数接受任意数量的字段 codec，并返回一个包含所有这些字段的对象的 codec。每个提供的字段都是一个数组，这样第一项是字段的名称，第二项是用于编码和解码该字段类型的 codec。
 
 ```ts twoslash
 import { getStructCodec, getU8Codec, getUtf8Codec, addCodecSizePrefix, Codec, getU32Codec } from "@solana/kit";
@@ -2460,17 +2370,19 @@ const personCodec: Codec<Person> = getStructCodec([
 const bytes = personCodec.encode({ name: "alice", age: 42 });
 // 0x05000000616c6963652a
 //   |                 └-- Age field.
+//   |                 └-- 年龄字段。
 //   └-- Name field.
+//   └-- 名字字段。
 
 const person = personCodec.decode(bytes);
 // { name: "alice", age: 42 }
 ```
 
-`getStructEncoder` and `getStructDecoder` functions are also available.
+`getStructEncoder` 和 `getStructDecoder` 函数也可用。
 
 ### getTupleCodec [!toc] [#get-tuple-codec]
 
-The `getTupleCodec` function accepts any number of codecs — `T`, `U`, `V`, etc. — and returns a tuple codec of type `[T, U, V, …]` such that each item is in the order of the provided codecs.
+`getTupleCodec` 函数接受任意数量的 codec — `T`、`U`、`V` 等 — 并返回一个类型为 `[T, U, V, …]` 的元组 codec，这样每个项都按照提供的 codec 的顺序排列。
 
 ```ts twoslash
 import { getTupleCodec, getU8Codec, getU64Codec, addCodecSizePrefix, getUtf8Codec, getU32Codec } from "@solana/kit";
@@ -2480,24 +2392,27 @@ const tupleCodec = getTupleCodec([addCodecSizePrefix(getUtf8Codec(), getU32Codec
 const bytes = tupleCodec.encode(["alice", 42, 123]);
 // 0x05000000616c6963652a7b00000000000000
 //   |                 | └-- 3rd item (123).
+//   |                 | └-- 第 3 项 (123)。
 //   |                 └-- 2nd item (42).
+//   |                 └-- 第 2 项 (42)。
 //   └-- 1st item ("alice").
+//   └-- 第 1 项 ("alice")。
 
 const value = tupleCodec.decode(bytes);
 // ["alice", 42, 123]
 ```
 
-`getTupleEncoder` and `getTupleDecoder` functions are also available.
+`getTupleEncoder` 和 `getTupleDecoder` 函数也可用。
 
 ### getUnionCodec [!toc] [#get-union-codec]
 
-The `getUnionCodec` is a lower-lever codec helper that can be used to encode/decode any TypeScript union.
+`getUnionCodec` 是一个较低级别的 codec 辅助函数，可用于编码/解码任何 TypeScript 联合。
 
-It accepts the following arguments:
+它接受以下参数：
 
-- An array of codecs, each defining a variant of the union.
-- A `getIndexFromValue` function which, given a value of the union, returns the index of the codec that should be used to encode that value.
-- A `getIndexFromBytes` function which, given the byte array to decode at a given offset, returns the index of the codec that should be used to decode the next bytes.
+- 一个 codec 数组，每个 codec 定义联合的一个变体。
+- 一个 `getIndexFromValue` 函数，给定联合的一个值，返回应用于编码该值的 codec 的索引。
+- 一个 `getIndexFromBytes` 函数，给定在给定偏移量处解码的字节数组，返回应用于解码下一个字节的 codec 的索引。
 
 ```ts twoslash
 import { getUnionCodec, getU16Codec, getBooleanCodec, Codec } from "@solana/kit";
@@ -2512,11 +2427,11 @@ codec.encode(42); // 0x2a00
 codec.encode(true); // 0x01
 ```
 
-`getUnionEncoder` and `getUnionDecoder` functions are also available.
+`getUnionEncoder` 和 `getUnionDecoder` 函数也可用。
 
 ### getUnitCodec [!toc] [#get-unit-codec]
 
-The `getUnitCodec` function returns a `Codec<void>` that encodes `undefined` into an empty `Uint8Array` and returns `undefined` without consuming any bytes when decoding. This is more of a low-level codec that can be used internally by other codecs. For instance, this is how [getDiscriminatedUnionCodec](#get-discriminated-union-codec) describes the codecs of empty variants.
+`getUnitCodec` 函数返回一个 `Codec<void>`，它将 `undefined` 编码为空的 `Uint8Array`，并在解码时不消耗任何字节的情况下返回 `undefined`。这更像是一个低级 codec，可以由其他 codec 在内部使用。例如，这就是 [getDiscriminatedUnionCodec](#get-discriminated-union-codec) 描述空变体的 codec 的方式。
 
 ```ts twoslash
 import { getUnitCodec } from "@solana/kit";
@@ -2526,4 +2441,5 @@ getUnitCodec().encode(undefined); // Empty Uint8Array
 getUnitCodec().decode(anyBytes); // undefined
 ```
 
-`getUnitEncoder` and `getUnitDecoder` functions are also available.
+`getUnitEncoder` 和 `getUnitDecoder` 函数也可用。
+```

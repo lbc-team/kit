@@ -1,15 +1,15 @@
 ---
-title: Generate a signer
-description: Create a new keypair signer and airdrop lamports to it
+title: 生成签名者
+description: 创建一个新的密钥对签名者并向其空投 lamports
 ---
 
-Before we can start crafting transactions, we're going to need a wallet that can sign transactions and pay for fees. In this article, we'll explore how to generate new keypairs and how to airdrop some lamports to them in test environments.
+在我们可以开始制作交易之前，我们需要一个可以签署交易并支付费用的钱包。在本文中，我们将探讨如何生成新的密钥对，以及如何在测试环境中向它们空投一些 lamports。
 
-## Generate a new `CryptoKeypair`
+## 生成一个新的 `CryptoKeypair`
 
-The Kit library uses the [native Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Crypto) for cryptographic tasks like generating key pairs and signing or verifying messages. This improves security by leveraging the browser's built-in functions instead of third-party libraries.
+Kit 库使用 [原生 Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Crypto) 进行诸如生成密钥对以及签名或验证消息之类的密码学任务。 这通过利用浏览器内置函数而不是第三方库来提高安全性。
 
-To create a new keypair, you can use the `generateKeyPair` helper function. This will return an instance of the native `CryptoKeyPair` type.
+要创建新的密钥对，可以使用 `generateKeyPair` 辅助函数。 这将返回原生 `CryptoKeyPair` 类型的实例。
 
 ```ts twoslash
 import { generateKeyPair } from "@solana/kit";
@@ -17,17 +17,17 @@ import { generateKeyPair } from "@solana/kit";
 const wallet: CryptoKeyPair = await generateKeyPair();
 ```
 
-And just like that, we have a wallet that can be used to sign transactions. However, Kit provides a useful abstraction on top of anything that can sign messages and/or transactions called `Signers`.
+就这样，我们有了一个可以用来签署交易的钱包。 但是，Kit 在任何可以签署消息和/或交易的内容之上提供了一个有用的抽象，称为 `Signers`。
 
-## Generate a new `KeyPairSigner`
+## 生成一个新的 `KeyPairSigner`
 
-Using `CryptoKeyPairs` is one way to sign and verify transactions but it isn't the only way. What if I want my transactions to be signed by an in-browser wallet? What if I want to sign them using a hardware wallet instead? What about a multisig wallet? Or what if I want some custom logic that detects the best way to sign a transaction based on the current environment?
+使用 `CryptoKeyPairs` 是一种签名和验证交易的方式，但不是唯一的方式。 如果我希望我的交易由浏览器内钱包签名怎么办？ 如果我想使用硬件钱包对其进行签名怎么办？ 多重签名钱包呢？ 或者，如果我想要一些自定义逻辑来检测基于当前环境签署交易的最佳方式怎么办？
 
-The `Signer` API allows us to decouple the signing logic from the rest of our code by providing signer interfaces that can be leveraged throughout the library. A `Signer` is an object that holds an `Address` and implements its own signing logic for messages and transactions.
+`Signer` API 允许我们通过提供可在整个库中使用的签名者接口，将签名逻辑与代码的其余部分分离。 `Signer` 是一个持有 `Address` 并为其消息和交易实现自己的签名逻辑的对象。
 
-Different types of signers are available for various use cases, but in this tutorial, we'll focus on the `KeyPairSigner` which signs transactions and messages using a `CryptoKeyPair`. It implements the `TransactionSigner` and `MessageSigner` interfaces so any function that requires a transaction or message signer will be able to use it.
+不同类型的签名者可用于各种用例，但在本教程中，我们将重点介绍 `KeyPairSigner`，它使用 `CryptoKeyPair` 签名交易和消息。 它实现了 `TransactionSigner` 和 `MessageSigner` 接口，因此任何需要交易或消息签名者的函数都可以使用它。
 
-We can use the `generateKeyPairSigner` function to create a new `KeyPairSigner` instance like so.
+我们可以使用 `generateKeyPairSigner` 函数创建一个新的 `KeyPairSigner` 实例，如下所示。
 
 ```ts twoslash
 import { generateKeyPairSigner } from "@solana/kit";
@@ -35,9 +35,9 @@ import { generateKeyPairSigner } from "@solana/kit";
 const wallet = await generateKeyPairSigner();
 ```
 
-As you can see, this is very similar to generating a `CryptoKeyPair`, but now we have an abstracted `Signer` object that can be replaced with any other type of signer in the future without affecting the rest of our code.
+正如你所看到的，这与生成 `CryptoKeyPair` 非常相似，但现在我们有了一个抽象的 `Signer` 对象，可以在将来替换为任何其他类型的签名者，而不会影响我们代码的其余部分。
 
-For instance, here's how we could replace our `KeyPairSigner` with a signer that uses an in-browser wallet instead.
+例如，以下是我们如何将 `KeyPairSigner` 替换为使用浏览器内钱包的签名者。
 
 ```ts twoslash
 import { generateKeyPairSigner, KeyPairSigner, TransactionSigner } from "@solana/kit";
@@ -52,11 +52,11 @@ wallet = await generateKeyPairSigner(); // [!code --]
 wallet = useWalletAccountTransactionSendingSigner(account, currentChain); // [!code ++]
 ```
 
-For a deeper dive into the Signer API, check out [this in-depth article about signers](/docs/concepts/signers).
+要深入了解 Signer API，请查看 [这篇关于签名者的深入文章](/docs/concepts/signers)。
 
-## Airdrop lamports
+## 空投 lamports
 
-Now that we know how to generate a new signer, let's make sure we give it some lamports so it can pay for transaction fees and account storage. For that we can use the `airdropFactory` function. Given an RPC and RPC subscriptions object, it will return a function that can be used to airdrop lamports to any address — provided we are in a test environment such as localnet.
+现在我们知道如何生成新的签名者，让我们确保给它一些 lamports，以便它可以支付交易费用和帐户存储。 为此，我们可以使用 `airdropFactory` 函数。 给定一个 RPC 和 RPC 订阅对象，它将返回一个函数，该函数可用于向任何地址空投 lamports — 前提是我们处于本地网络等测试环境中。
 
 ```ts twoslash
 import {
@@ -67,12 +67,12 @@ import {
   lamports,
 } from "@solana/kit";
 
-// Create the RPC, RPC Subscriptions and airdrop function.
+// 创建 RPC、RPC 订阅和空投函数。
 const rpc = createSolanaRpc("http://127.0.0.1:8899");
 const rpcSubscriptions = createSolanaRpcSubscriptions("ws://127.0.0.1:8900");
 const airdrop = airdropFactory({ rpc, rpcSubscriptions });
 
-// Generate a new wallet with 1 SOL.
+// 生成一个具有 1 SOL 的新钱包。
 const wallet = await generateKeyPairSigner();
 await airdrop({
   recipientAddress: wallet.address,
@@ -81,9 +81,9 @@ await airdrop({
 });
 ```
 
-## Adjust our `Client` object
+## 调整我们的 `Client` 对象
 
-Since we're going to rely on this signer for the rest of the tutorial, let's adjust our `Client` object to include it.
+由于本教程的其余部分我们将依赖于此签名者，因此让我们调整我们的 `Client` 对象以包含它。
 
 ```ts twoslash title="src/client.ts"
 import {
@@ -106,12 +106,12 @@ export type Client = {
 let client: Client | undefined;
 export async function createClient(): Promise<Client> {
   if (!client) {
-    // Create RPC objects and airdrop function.
+    // 创建 RPC 对象和空投函数。
     const rpc = createSolanaRpc("http://127.0.0.1:8899");
     const rpcSubscriptions = createSolanaRpcSubscriptions("ws://127.0.0.1:8900");
     const airdrop = airdropFactory({ rpc, rpcSubscriptions });
 
-    // Create a wallet with lamports.
+    // 创建一个带有 lamports 的钱包。
     const wallet = await generateKeyPairSigner();
     await airdrop({
       recipientAddress: wallet.address,
@@ -119,14 +119,14 @@ export async function createClient(): Promise<Client> {
       commitment: "confirmed",
     });
 
-    // Store the client.
+    // 存储客户端。
     client = { rpc, rpcSubscriptions, wallet };
   }
   return client;
 }
 ```
 
-Notice how we had to make the `createClient` function asynchronous since it now contains asynchronous code to generate the `KeyPairSigner` and airdrop lamports to it. That means, we also need to adjust our main `tutorial` function accordingly. And whilst we're at it, let's display the balance of our newly created wallet.
+请注意，我们必须使 `createClient` 函数异步，因为它现在包含用于生成 `KeyPairSigner` 并向其空投 lamports 的异步代码。 这意味着，我们还需要相应地调整我们的主 `tutorial` 函数。 在此期间，让我们显示我们新创建的钱包的余额。
 
 ```ts twoslash title="src/index.ts"
 import {
@@ -153,4 +153,4 @@ async function tutorial() {
 }
 ```
 
-We've now got everything we need to start crafting transactions! In the next article, we'll build instructions that create a new token on Solana.
+我们现在拥有开始制作交易所需的一切！ 在下一篇文章中，我们将构建在 Solana 上创建新 token 的指令。

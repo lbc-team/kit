@@ -1,22 +1,22 @@
 ---
-title: Create instructions
-description: Build instructions that create a new Solana token
+title: 创建指令
+description: 构建用于创建新的 Solana token 的指令
 ---
 
-## A new token
+## 新的 token
 
-Now that our `Client` helper is ready, let's use it to build a new transaction. In this tutorial, we'll build a simple transaction that creates a new Solana token using the [Token program](https://github.com/solana-program/token).
+现在我们的 `Client` 助手已经准备就绪，让我们用它来构建一个新的交易。在本教程中，我们将构建一个简单的交易，该交易使用 [Token program](https://github.com/solana-program/token) 创建一个新的 Solana token。
 
-More precisely, we will create a `Mint` account which is the main account that represents a Solana token. We will need at least two instructions to create a new `Mint` account:
+更准确地说，我们将创建一个 `Mint` 账户，该账户是代表 Solana token 的主要账户。我们需要至少两个指令来创建一个新的 `Mint` 账户：
 
-- The `CreateAccount` instruction of the [System program](https://github.com/solana-program/system). This will allocate a new account on the Solana blockchain and assign it to the Token program.
-- The `InitializeMint` instruction of the [Token program](https://github.com/solana-program/token). This will initialize the previously allocated account as a new `Mint` account.
+- [System program](https://github.com/solana-program/system) 的 `CreateAccount` 指令。这将在 Solana 区块链上分配一个新账户，并将其分配给 Token program。
+- [Token program](https://github.com/solana-program/token) 的 `InitializeMint` 指令。这将初始化先前分配的账户作为新的 `Mint` 账户。
 
-## The `createMint` helper
+## `createMint` 助手
 
-Before we start constructing these instructions, let's create a new `create-mint.ts` file under our `src` directory. We'll export a `createMint` function that will be responsible for building and sending the transaction that creates a new `Mint` account.
+在我们开始构建这些指令之前，让我们在 `src` 目录下创建一个新的 `create-mint.ts` 文件。我们将导出一个 `createMint` 函数，该函数将负责构建和发送创建新的 `Mint` 账户的交易。
 
-We'll accept our `Client` object as the first argument and some options as the second argument. To keep things simple, we'll only support customizing the number of decimals for the new `Mint` account.
+我们将接受我们的 `Client` 对象作为第一个参数，并将一些选项作为第二个参数。为了简单起见，我们将仅支持自定义新 `Mint` 账户的小数位数。
 
 ```ts twoslash title="src/create-mint.ts"
 // @filename: client.ts
@@ -42,11 +42,11 @@ export async function createMint(client: Client, options: { decimals?: number } 
 }
 ```
 
-Next, let's start building our instructions inside that `createMint` helper.
+接下来，让我们开始在 `createMint` 助手函数中构建我们的指令。
 
-## The `CreateAccount` instruction
+## `CreateAccount` 指令
 
-To allocate a new account on the Solana blockchain, we need to use the `CreateAccount` instruction of the System program. We can build this instruction using the `getCreateAccountInstruction` helper from the `@solana-program/system` library.
+为了在 Solana 区块链上分配一个新账户，我们需要使用 System program 的 `CreateAccount` 指令。我们可以使用 `@solana-program/system` 库中的 `getCreateAccountInstruction` 助手函数来构建此指令。
 
 ```ts twoslash title="src/create-mint.ts"
 // @filename: client.ts
@@ -76,6 +76,7 @@ import type { Client } from "./client";
 
 export async function createMint(client: Client, options: { decimals?: number } = {}) {
   // Build instructions.
+  // 构建指令
   const createAccountIx = getCreateAccountInstruction({
     payer,
     newAccount,
@@ -86,9 +87,9 @@ export async function createMint(client: Client, options: { decimals?: number } 
 }
 ```
 
-As you can see, the `getCreateAccountInstruction` helper requires a handful of inputs that we need to provide:
+正如你所看到的，`getCreateAccountInstruction` 助手函数需要一些我们需要提供的输入：
 
-- The `payer` signer that will pay for the storage fees of the newly allocated account. In our case, we'll use the `wallet` signer of our `Client` object.
+- `payer` 签名者，他将支付新分配账户的存储费用。在我们的例子中，我们将使用 `Client` 对象的 `wallet` 签名者。
   ```ts twoslash
   import {
     Rpc,
@@ -107,17 +108,17 @@ As you can see, the `getCreateAccountInstruction` helper requires a handful of i
   // ---cut-before---
   const payer = client.wallet;
   ```
-- The `newAccount` itself as a signer. Since this can be any address, we'll generate a new one and save it as a `mint` variable.
+- `newAccount` 本身作为签名者。由于这可以是任何地址，我们将生成一个新的地址，并将其保存为 `mint` 变量。
   ```ts twoslash
   import { generateKeyPairSigner } from "@solana/kit";
   const mint = await generateKeyPairSigner();
   ```
-- The `space` we want to allocated for the new account. For this, we can use the `getMintSize` helper from the `@solana-program/token` library.
+- 我们想要为新账户分配的 `space`。为此，我们可以使用 `@solana-program/token` 库中的 `getMintSize` 助手函数。
   ```ts twoslash
   import { getMintSize } from "@solana-program/token";
   const mintSize = getMintSize();
   ```
-- The number of `lamports` to transfer to the new account in order to pay for the storage fees. This can be deduced from the size we want to allocate for the account by using `getMinimumBalanceForRentExemption` RPC method. This method returns the minimum lamports required for an account of the given size.
+- 要转移到新账户以支付存储费用的 `lamports` 数量。这可以通过使用 `getMinimumBalanceForRentExemption` RPC 方法从我们想要为账户分配的大小中推断出来。此方法返回给定大小的账户所需的最小 lamports。
   ```ts twoslash
   import {
     Rpc,
@@ -138,13 +139,13 @@ As you can see, the `getCreateAccountInstruction` helper requires a handful of i
   // ---cut-before---
   const mintRent = await client.rpc.getMinimumBalanceForRentExemption(BigInt(mintSize)).send();
   ```
-- The `programAddress` of the program that will own the new account. In our case, that's the Token program whose address is accessible via the `TOKEN_PROGRAM_ADDRESS` constant of the `@solana-program/token` library.
+- 将拥有新账户的程序的 `programAddress`。在我们的例子中，它是 Token program，其地址可以通过 `@solana-program/token` 库的 `TOKEN_PROGRAM_ADDRESS` 常量访问。
   ```ts twoslash
   import { TOKEN_PROGRAM_ADDRESS } from "@solana-program/token";
   const programAddress = TOKEN_PROGRAM_ADDRESS;
   ```
 
-We end up with the following code. Notice how we wrapped a few promises that could be executed in parallel in a `Promise.all` to make the code more efficient.
+我们最终得到以下代码。请注意，我们如何将一些可以并行执行的 promise 包装在 `Promise.all` 中，以使代码更高效。
 
 ```ts twoslash title="src/create-mint.ts"
 // @filename: client.ts
@@ -171,6 +172,7 @@ import type { Client } from "./client";
 
 export async function createMint(client: Client, options: { decimals?: number } = {}) {
   // Prepare inputs.
+  // 准备输入
   const mintSize = getMintSize();
   const [mint, mintRent] = await Promise.all([
     generateKeyPairSigner(),
@@ -178,6 +180,7 @@ export async function createMint(client: Client, options: { decimals?: number } 
   ]);
 
   // Build instructions.
+  // 构建指令
   const createAccountIx = getCreateAccountInstruction({
     payer: client.wallet,
     newAccount: mint,
@@ -188,9 +191,9 @@ export async function createMint(client: Client, options: { decimals?: number } 
 }
 ```
 
-## The `InitializeMint` instruction
+## `InitializeMint` 指令
 
-Now that we have an empty account allocated on chain, let's initialize it as a `Mint` account. For that, we can use the `getInitializeMintInstruction` helper from the `@solana-program/token` library.
+现在我们已经在链上分配了一个空账户，让我们将其初始化为 `Mint` 账户。为此，我们可以使用 `@solana-program/token` 库中的 `getInitializeMintInstruction` 助手函数。
 
 ```ts twoslash
 const mint = null as any;
@@ -208,14 +211,14 @@ const initializeMintIx = getInitializeMintInstruction({
 });
 ```
 
-This time, the instruction requires we provide the following inputs:
+这次，该指令要求我们提供以下输入：
 
-- The address of the `mint` account we just allocated. Since we already generated a new `mint` signer, we just need to provide `mint.address`.
-- The number of `decimals` for the new `Mint` account. We'll use the `options.decimals` argument or default to `0`.
-- The authority that can mint new tokens. Here, we'll use the `wallet` signer of our `Client` object.
-- The optional authority that can freeze tokens. Let's also use the `wallet` signer for this.
+- 我们刚刚分配的 `mint` 账户的地址。由于我们已经生成了一个新的 `mint` 签名者，我们只需要提供 `mint.address`。
+- 新 `Mint` 账户的 `decimals` 数量。我们将使用 `options.decimals` 参数或默认为 `0`。
+- 可以铸造新 token 的授权机构。在这里，我们将使用 `Client` 对象的 `wallet` 签名者。
+- 可以冻结 token 的可选授权机构。让我们也使用 `wallet` 签名者。
 
-We end up with the following code:
+我们最终得到以下代码：
 
 ```ts twoslash title="src/create-mint.ts"
 // @filename: client.ts
@@ -242,6 +245,7 @@ import type { Client } from "./client";
 
 export async function createMint(client: Client, options: { decimals?: number } = {}) {
   // Prepare inputs.
+  // 准备输入
   const mintSize = getMintSize();
   const [mint, mintRent] = await Promise.all([
     generateKeyPairSigner(),
@@ -249,6 +253,7 @@ export async function createMint(client: Client, options: { decimals?: number } 
   ]);
 
   // Build instructions.
+  // 构建指令
   const createAccountIx = getCreateAccountInstruction({
     payer: client.wallet,
     newAccount: mint,
@@ -265,21 +270,23 @@ export async function createMint(client: Client, options: { decimals?: number } 
 }
 ```
 
-## Compute budget instructions
+## 计算预算指令
 
-On top of any instructions we might need in our transactions, we may also use instructions from the Compute Budget program to configure our transaction's compute allocation. For instance, we may use the `SetComputeUnitLimit` instruction to set the maximum number of compute units (CUs) that our transaction can consume. The lower that number is, the higher the chances that our transaction will be included in the next block. Additionally, the `SetComputeUnitPrice` instruction can be used to provide additional priority fees for our transactions in the form of micro-lamports per CU.
+除了我们可能需要在交易中使用的任何指令之外，我们还可以使用 Compute Budget program 中的指令来配置交易的计算分配。例如，我们可以使用 `SetComputeUnitLimit` 指令来设置我们的交易可以消耗的最大计算单元 (CU) 数量。该数字越低，我们的交易被包含在下一个区块中的机会就越高。此外，`SetComputeUnitPrice` 指令可用于以每个 CU 的微型 lamports 形式为我们的交易提供额外的优先级费用。
 
-If we wanted to include these instructions explicitly in our transaction, we could use the `getSetComputeUnitLimitInstruction` and `getSetComputeUnitPriceInstruction` helpers from the `@solana-program/compute-budget` library.
+如果我们想在我们的交易中显式包含这些指令，我们可以使用 `@solana-program/compute-budget` 库中的 `getSetComputeUnitLimitInstruction` 和 `getSetComputeUnitPriceInstruction` 助手。
 
 ```ts twoslash
 import { getSetComputeUnitLimitInstruction, getSetComputeUnitPriceInstruction } from "@solana-program/compute-budget";
 
 const setComputeLimitIx = getSetComputeUnitLimitInstruction({
-  units: 50_000, // 50k CUs per transaction.
+  units: 50_000, // 每次交易 50k CU。
+  // 50k CUs per transaction.
 });
 const setComputePriceIx = getSetComputeUnitPriceInstruction({
-  microLamports: 10_000, // 10k micro-lamports per CU, as priority fees.
+  microLamports: 10_000, // 每个 CU 10k 微型 lamports，作为优先级费用。
+  // 10k micro-lamports per CU, as priority fees.
 });
 ```
 
-However, for this tutorial, we won't set up priority fees and we will use another helper to estimate the compute unit our transaction will consume by simulating it. We will tackle this — as well as the transaction message construction — in the next article.
+但是，在本教程中，我们将不设置优先级费用，我们将使用另一个助手通过模拟来估计我们的交易将消耗的计算单元。我们将在下一篇文章中解决这个问题——以及交易消息构建。

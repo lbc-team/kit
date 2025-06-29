@@ -1,15 +1,15 @@
 ---
-title: Send a transaction
-description: Send a transaction to the blockchain and wait for its confirmation
+title: 发送交易
+description: 发送交易到区块链并等待确认
 ---
 
-In the previous article, we constructed a signed transaction that creates a Solana token. Now, let's see how we can send this transaction and ensure it has been confirmed by the network.
+在前一篇文章中，我们构建了一个已签名的交易来创建一个 Solana token。现在，让我们看看如何发送此交易并确保它已获得网络的确认。
 
-## Send transactions without confirming
+## 发送交易而不确认
 
-The most common way to send transactions is via the `sendTransaction` RPC method. This method accepts an encoded signed transaction and forwards it to the configured RPC node so it can handle this for us.
+发送交易最常见的方式是通过 `sendTransaction` RPC 方法。此方法接受编码后的签名交易，并将其转发到配置的 RPC 节点，以便它可以为我们处理。
 
-One way to tackle this would be to encode the transaction ourselves using `getBase64EncodedWireTransaction` and pass it to the `sendTransaction` RPC method like so.
+一种解决办法是使用 `getBase64EncodedWireTransaction` 对交易进行编码，并将其传递给 `sendTransaction` RPC 方法，如下所示。
 
 ```ts twoslash
 import { FullySignedTransaction, TransactionWithBlockhashLifetime, Rpc, SolanaRpcApi } from "@solana/kit";
@@ -22,7 +22,7 @@ const encodedTransaction = getBase64EncodedWireTransaction(signedTransaction);
 await rpc.sendTransaction(encodedTransaction, { preflightCommitment: "confirmed", encoding: "base64" }).send();
 ```
 
-However, Kit offers a helper function that does that for us whilst providing some sensible default values. This function is called `sendTransactionWithoutConfirmingFactory` and, given an RPC object, it returns a function that sends transactions without waiting for confirmation.
+然而，Kit 提供了一个辅助函数，它为我们完成了这项工作，同时提供了一些合理的默认值。这个函数叫做 `sendTransactionWithoutConfirmingFactory`，给定一个 RPC 对象，它返回一个发送交易而不等待确认的函数。
 
 ```ts twoslash
 import { FullySignedTransaction, TransactionWithBlockhashLifetime, Rpc, SolanaRpcApi } from "@solana/kit";
@@ -35,18 +35,18 @@ const sendTransaction = sendTransactionWithoutConfirmingFactory({ rpc });
 await sendTransaction(signedTransaction, { commitment: "confirmed" });
 ```
 
-## Confirmation strategies
+## 确认策略
 
-Sending transactions is one thing but, more often than not, we'll want to make sure they have been processed by the network before we continue with our application logic.
+发送交易是一回事，但通常情况下，我们希望确保它们已被网络处理，然后再继续执行我们的应用程序逻辑。
 
-There are several ways to ensure a transaction was confirmed by the network. For instance, we could poll the network at regular intervals to check the status of the transaction until it has the required commitment level. Another way would be to listen for network events and use them to determine the status of the sent transaction.
+有几种方法可以确保交易已获得网络的确认。例如，我们可以定期轮询网络以检查交易的状态，直到它达到所需的 commitment level。另一种方法是监听网络事件，并使用它们来确定已发送交易的状态。
 
-Sometimes it may be useful to dig deeper into confirmation strategies and create custom ones that make the most sense for our applications. But for all other cases, Kit provides helpers that abstract this complexity away from us. Namely, it provides two helper functions that both send and confirm transactions. Which function to use depends on the lifetime set on the transaction.
+有时，深入研究确认策略并创建最适合我们应用程序的自定义策略可能很有用。但在所有其他情况下，Kit 提供了辅助函数，可以消除这种复杂性。即，它提供了两个辅助函数，它们都发送和确认交易。要使用哪个函数取决于交易中设置的 lifetime。
 
-- `sendAndConfirmTransactionFactory` is used for transactions using a blockhash strategy for its lifetime.
-- `sendAndConfirmDurableNonceTransactionFactory` is used for transactions using a durable nonce strategy for its lifetime.
+- `sendAndConfirmTransactionFactory`  用于使用 blockhash 策略作为其 lifetime 的交易。
+- `sendAndConfirmDurableNonceTransactionFactory` 用于使用 durable nonce 策略作为其 lifetime 的交易。
 
-Both accept RPC and RPC Subscriptions objects and return a function that sends and confirms transactions for us. Since we are using the blockhash strategy in this tutorial, we'll use the `sendAndConfirmTransactionFactory` function.
+两者都接受 RPC 和 RPC Subscriptions 对象，并返回一个为我们发送和确认交易的函数。由于我们在本教程中使用的是 blockhash 策略，因此我们将使用 `sendAndConfirmTransactionFactory` 函数。
 
 ```ts twoslash
 import {
@@ -67,13 +67,13 @@ const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSub
 await sendAndConfirmTransaction(signedTransaction, { commitment: "confirmed" });
 ```
 
-## Transaction signatures
+## 交易签名
 
-If you hover on top of the `sendTransaction` or `sendAndConfirmTransaction` functions above, you'll notice that their return type is simply `Promise<void>`. That is, they do not return the transaction signature that uniquely identifies that transaction on the network.
+如果将鼠标悬停在上面的 `sendTransaction` 或 `sendAndConfirmTransaction` 函数上，您会注意到它们的返回类型只是 `Promise<void>`。也就是说，它们不返回交易签名，而该签名在网络上唯一标识该交易。
 
-This is because there is a common misconception that one must wait for the transaction to be sent to the network before obtaining its signature. However, that's not the case. The transaction signature is accessible as soon as the transaction is signed by its fee payer. This is because the signature that uniquely identifies a transaction is none other than the fee payer's signature for that transaction.
+这是因为存在一个常见的误解，即必须等待交易发送到网络才能获得其签名。然而，事实并非如此。一旦交易由其 fee payer 签名，就可以访问交易签名。这是因为唯一标识交易的签名不是其他，正是该交易的 fee payer 的签名。
 
-As such, Kit decouples these two distinct concepts by offering a `getSignatureFromTransaction` function that returns the signature of a transaction that can be used even before it is sent to the network.
+因此，Kit 通过提供一个 `getSignatureFromTransaction` 函数来分离这两个不同的概念，该函数返回一个交易的签名，即使在将其发送到网络之前也可以使用该签名。
 
 ```ts twoslash
 import {
@@ -90,17 +90,17 @@ const rpcSubscriptions = null as unknown as RpcSubscriptions<SolanaRpcSubscripti
 // ---cut-before---
 import { getSignatureFromTransaction, sendAndConfirmTransactionFactory } from "@solana/kit";
 
-// Access the transaction signature.
+// 访问交易签名。
 const signature = getSignatureFromTransaction(signedTransaction);
 
-// Send and confirm the transaction.
+// 发送并确认交易。
 const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
 await sendAndConfirmTransaction(signedTransaction, { commitment: "confirmed" });
 ```
 
-## Update `client.ts`
+## 更新 `client.ts`
 
-With all that new knowledge in hand, let's update our `Client` object to include the new `sendAndConfirmTransaction` function created from the `sendAndConfirmTransactionFactory` helper.
+掌握了所有这些新知识后，让我们更新我们的 `Client` 对象，以包含从 `sendAndConfirmTransactionFactory` 辅助函数创建的新 `sendAndConfirmTransaction` 函数。
 
 ```ts twoslash title="src/client.ts"
 import {
@@ -137,10 +137,10 @@ export async function createClient(): Promise<Client> {
   if (!client) {
     // ...
 
-    // Create a function to send and confirm transactions. // [!code ++]
+    // 创建一个发送和确认交易的函数。 // [!code ++]
     const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions }); // [!code ++]
 
-    // Store the client.
+    // 存储客户端。
     client = {
       estimateAndSetComputeUnitLimit,
       rpc,
@@ -153,13 +153,13 @@ export async function createClient(): Promise<Client> {
 }
 ```
 
-## Update `create-mint.ts`
+## 更新 `create-mint.ts`
 
-Now, let's make use of our new `client.sendAndConfirmTransaction` helper in the `createMint` function.
+现在，让我们在 `createMint` 函数中使用我们新的 `client.sendAndConfirmTransaction` 辅助函数。
 
-All that's left to do is return the address of the `Mint` account we created so the caller of this function can use it for further operations.
+剩下要做的就是返回我们创建的 `Mint` 帐户的地址，以便此函数的调用者可以将其用于进一步的操作。
 
-And with that, our `createMint` function is complete!
+这样，我们的 `createMint` 函数就完成了！
 
 ```ts twoslash title="src/create-mint.ts"
 // @filename: client.ts
@@ -197,7 +197,7 @@ import { getInitializeMintInstruction, getMintSize, TOKEN_PROGRAM_ADDRESS } from
 import type { Client } from "./client";
 
 export async function createMint(client: Client, options: { decimals?: number } = {}) {
-  // Prepare inputs.
+  // 准备输入。
   const mintSize = getMintSize();
   const [mint, mintRent, { value: latestBlockhash }] = await Promise.all([
     generateKeyPairSigner(),
@@ -205,7 +205,7 @@ export async function createMint(client: Client, options: { decimals?: number } 
     client.rpc.getLatestBlockhash().send(),
   ]);
 
-  // Build instructions.
+  // 构建指令。
   const createAccountIx = getCreateAccountInstruction({
     payer: client.wallet,
     newAccount: mint,
@@ -220,7 +220,7 @@ export async function createMint(client: Client, options: { decimals?: number } 
     freezeAuthority: client.wallet.address,
   });
 
-  // Build the transaction message.
+  // 构建交易消息。
   const transactionMessage = await pipe(
     createTransactionMessage({ version: 0 }),
     (tx) => setTransactionMessageFeePayerSigner(client.wallet, tx),
@@ -229,20 +229,20 @@ export async function createMint(client: Client, options: { decimals?: number } 
     (tx) => client.estimateAndSetComputeUnitLimit(tx),
   );
 
-  // Compile the transaction message and sign it.
+  // 编译交易消息并签名。
   const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
 
-  // Send the transaction and wait for confirmation.
+  // 发送交易并等待确认。 // [!code ++]
   await client.sendAndConfirmTransaction(signedTransaction, { commitment: "confirmed" }); // [!code ++]
 
-  // Return the address of the created mint account. // [!code ++]
+  // 返回已创建的 Mint 帐户的地址。 // [!code ++]
   return mint.address; // [!code ++]
 }
 ```
 
-## Update `index.ts`
+## 更新 `index.ts`
 
-Finally, let's update our main `tutorial` function to execute the `createMint` function and log the address of the newly created mint account.
+最后，让我们更新我们的主 `tutorial` 函数以执行 `createMint` 函数并记录新创建的 mint 帐户的地址。
 
 ```ts twoslash title="src/index.ts"
 // @filename: client.ts
@@ -284,4 +284,4 @@ async function tutorial() {
 }
 ```
 
-On the next article, we'll use that address to fetch and decode the mint account we just created.
+在下一篇文章中，我们将使用该地址来获取和解码我们刚刚创建的 mint 帐户。

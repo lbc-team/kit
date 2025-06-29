@@ -1,24 +1,24 @@
 ---
-title: Installation
-description: Get started with Kit
+title: 安装
+description: Kit 入门
 ---
 
-Kit is a JavaScript SDK for building Solana apps across environments like Node, the web, and React Native. It provides a comprehensive set of data types and helper functions, forming the foundation for interacting with Solana in JavaScript.
+Kit 是一个 JavaScript SDK，用于构建跨 Node、Web 和 React Native 等环境的 Solana 应用程序。 它提供了一套全面的数据类型和辅助函数，为在 JavaScript 中与 Solana 交互奠定了基础。
 
-<Callout title="Coming from Web3.js?">
-  Check out our [Upgrade guide](/docs/upgrade-guide) to see how Kit compares to Web3.js.
+<Callout title="来自 Web3.js?">
+  查看我们的 [升级指南](/docs/upgrade-guide)，了解 Kit 与 Web3.js 的比较。
 </Callout>
 
-## Quick start
+## 快速开始
 
-Follow these simple steps to install and get started with Kit:
+按照以下简单步骤安装 Kit 并开始使用：
 
 <Steps>
 <Step>
  
-### Install Kit
+### 安装 Kit
 
-Install Kit using the main `@solana/kit` library. It includes many smaller packages — such as `@solana/rpc` or `@solana/transactions` — that can also be used individually for more granular imports.
+使用主 `@solana/kit` 库安装 Kit。 它包含许多较小的软件包，例如 `@solana/rpc` 或 `@solana/transactions`，这些软件包也可以单独使用，以实现更精细的导入。
 
 ```package-install
 @solana/kit
@@ -28,9 +28,9 @@ Install Kit using the main `@solana/kit` library. It includes many smaller packa
 
 <Step>
 
-### Install program clients
+### 安装程序客户端
 
-Install Kit compatible clients for any program you want to interact with. For example, to interact with the System program, install the `@solana-program/system` package. You can find a [list of available program clients here](/docs/compatible-clients).
+为要交互的任何程序安装 Kit 兼容的客户端。 例如，要与 System 程序交互，请安装 `@solana-program/system` 包。 你可以在[此处找到可用程序客户端的列表](/docs/compatible-clients)。
 
 ```package-install
 npm install @solana-program/system \
@@ -43,11 +43,11 @@ npm install @solana-program/system \
 
 <Step>
 
-### Set up your project
+### 设置你的项目
 
-Use primitives provided by Kit to set up your project and start interacting with Solana!
+使用 Kit 提供的原语来设置你的项目并开始与 Solana 交互！
 
-For example, if you are planning on sending transactions, you will likely need an RPC API, an RPC Subscriptions API and a "send and confirm" strategy.
+例如，如果你计划发送交易，你可能需要一个 RPC API、一个 RPC 订阅 API 和一个“发送并确认”策略。
 
 ```ts twoslash
 import { createSolanaRpc, createSolanaRpcSubscriptions, sendAndConfirmTransactionFactory } from "@solana/kit";
@@ -57,7 +57,7 @@ const rpcSubscriptions = createSolanaRpcSubscriptions("wss://api.devnet.solana.c
 const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
 ```
 
-Check out our [Getting started](/docs/getting-started) tutorial and our [Core concepts](/docs/concepts) guides to learn more about how to use Kit.
+查看我们的[入门](/docs/getting-started)教程和我们的[核心概念](/docs/concepts)指南，以了解有关如何使用 Kit 的更多信息。
 
 </Step>
 </Steps>

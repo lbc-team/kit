@@ -1,13 +1,13 @@
 ---
-title: Fetch an account
-description: Fetch and decode on-chain accounts
+title: 获取账户
+description: 获取和解码链上账户
 ---
 
-In the previous article of this series, we've learned how to send a transaction that creates a new Solana token — also known as a `Mint` account. In this last article, we'll learn how to retrieve the account we created and access its decoded data.
+在本系列的前一篇文章中，我们学习了如何发送一个创建新的 Solana token 的交易，也称为 `Mint` 账户。在最后一篇文章中，我们将学习如何检索我们创建的账户并访问其解码后的数据。
 
-## Fetch using RPC methods
+## 使用 RPC 方法获取
 
-RPC methods such as `getAccountInfo` or `getMultipleAccounts` can be used to fetch on-chain accounts from their addresses. These take a variety of options and return different outputs based on these options. For instance, the `encoding` option will determine which string format to use when returning the account's encoded data.
+可以使用 `getAccountInfo` 或 `getMultipleAccounts` 等 RPC 方法从链上地址获取账户。这些方法接受各种选项，并根据这些选项返回不同的输出。例如，`encoding` 选项将决定在返回账户的编码数据时使用哪种字符串格式。
 
 ```ts twoslash
 import { Rpc, SolanaRpcApi } from "@solana/kit";
@@ -19,13 +19,13 @@ const { value: account } = await rpc.getAccountInfo(address("1234..5678")).send(
 const { value: accounts } = await rpc.getMultipleAccounts([address("1234..5678")]).send();
 ```
 
-## Fetch using helpers
+## 使用助手函数获取
 
-Having so many possible return values makes it harder to work with the retrieved information. For instance, the `getAccountInfo` RPC method will default to a Base58 encoding whereas the `getMultipleAccounts` method will default to Base64.
+拥有如此多的可能返回值使得处理检索到的信息变得更加困难。例如，`getAccountInfo` RPC 方法将默认为 Base58 编码，而 `getMultipleAccounts` 方法将默认为 Base64。
 
-Additionally, when trying to fetch an account that does not exist on-chain, the `null` value is returned which is particularly inconvenient when dealing with multiple accounts as it requires zipping the address array with the account array to determine which ones are missing.
+此外，当尝试获取链上不存在的账户时，将返回 `null` 值，这在处理多个账户时尤其不方便，因为它需要将地址数组与账户数组压缩在一起以确定哪些账户缺失。
 
-Therefore, Kit offers a set of types and helpers that aim to unify these APIs and make them easier to work with. For instance, the `fetchEncodedAccount` and `fetchEncodedAccounts` helpers can be used to fetch one or multiple accounts and return them in a unified format.
+因此，Kit 提供了一组类型和助手函数，旨在统一这些 API 并使它们更易于使用。例如，`fetchEncodedAccount` 和 `fetchEncodedAccounts` 助手函数可用于获取一个或多个账户，并以统一的格式返回它们。
 
 ```ts twoslash
 import { Rpc, SolanaRpcApi } from "@solana/kit";
@@ -40,7 +40,7 @@ account satisfies MaybeEncodedAccount;
 accounts satisfies MaybeEncodedAccount[];
 ```
 
-As you can see, the return types are all `MaybeAccounts`. This means the account may or may not exist on-chain. It contains an `exists` field indicating whether the account exists. If it does, we have access to all its fields. Otherwise, we just know its address — since it was provided as an input.
+正如你所看到的，返回类型都是 `MaybeAccounts`。这意味着该账户可能存在于链上，也可能不存在。它包含一个 `exists` 字段，指示该账户是否存在。如果存在，我们可以访问其所有字段。否则，我们只知道它的地址 —— 因为它是作为输入提供的。
 
 ```ts twoslash
 import { Rpc, SolanaRpcApi } from "@solana/kit";
@@ -51,15 +51,15 @@ import { EncodedAccount, address, Address, fetchEncodedAccount, fetchEncodedAcco
 const account = await fetchEncodedAccount(rpc, address("1234..5678"));
 
 if (account.exists) {
-  // If it exists, we have access to all its fields.
+  // 如果它存在，我们可以访问它的所有字段。
   account satisfies EncodedAccount<"1234..5678">;
 } else {
-  // Otherwise, we just know its address.
+  // 否则，我们只知道它的地址。
   account satisfies { address: Address<"1234..5678">; exists: false };
 }
 ```
 
-We can also assert the existence of an account using the `assertAccountExists` helper. This will throw an error if the account does not exist and tell TypeScript that our `MaybeAccount` is actually an `Account` moving forward.
+我们还可以使用 `assertAccountExists` 助手函数来断言账户的存在。如果账户不存在，这将抛出一个错误，并告诉 TypeScript 我们的 `MaybeAccount` 实际上是一个 `Account`。
 
 ```ts twoslash
 import { Rpc, SolanaRpcApi } from "@solana/kit";
@@ -73,23 +73,23 @@ assertAccountExists(account);
 account satisfies EncodedAccount;
 ```
 
-## Decode the data manually
+## 手动解码数据
 
-So far, we have been dealing with encoded accounts, meaning the `data` field of the fetched account is a byte array — i.e. a `Uint8Array`. But we are realistically going to need to decode that data into a more usable format.
+到目前为止，我们一直在处理编码的账户，这意味着获取的账户的 `data` 字段是一个字节数组 —— 即一个 `Uint8Array`。但实际上我们需要将该数据解码为更易于使用的格式。
 
-Kit ships with a set of serialization libraries called Codecs. These libraries offer types and functions to create Codec objects that can be composed together to create more complex serialization and deserialization logic.
+Kit 提供了一组名为 Codecs 的序列化库。这些库提供类型和函数来创建 Codec 对象，这些对象可以组合在一起以创建更复杂的序列化和反序列化逻辑。
 
-You can [read more about Codecs here](/docs/concepts/codecs), but let's quickly see how we can create a Codec object to decode our `Mint` account.
+你可以在[此处阅读有关 Codecs 的更多信息](/docs/concepts/codecs)，但让我们快速了解如何创建一个 Codec 对象来解码我们的 `Mint` 账户。
 
-Mint accounts are composed of the following data:
+Mint 账户由以下数据组成：
 
-- A `mintAuthority` which is an optional address. When set, this address can mint new tokens.
-- A `supply` integer using a `u64`. This keeps track of the total supply of tokens.
-- A `decimals` integer using a `u8`. This keeps track of the number of decimal places for the token.
-- An `isInitialized` boolean using a single byte. This tells us whether the mint account has been initialized.
-- A `freezeAuthority` which is an optional address. When set, this address can freeze token accounts.
+- `mintAuthority` 是一个可选地址。设置后，此地址可以铸造新的 token。
+- `supply` 是一个使用 `u64` 的整数。这用于跟踪 token 的总供应量。
+- `decimals` 是一个使用 `u8` 的整数。这用于跟踪 token 的小数位数。
+- `isInitialized` 是一个使用单个字节的布尔值。这告诉我们 mint 账户是否已初始化。
+- `freezeAuthority` 是一个可选地址。设置后，此地址可以冻结 token 账户。
 
-By composing various Codec functions — such as `getStructCodec` to create objects or `getOptionCodec` to create optional data — we can design a Codec object that describes the byte layout of the `Mint` account. Here's an example illustrating that. Note that the layout of the `Mint` account was slightly simplified for this example.
+通过组合各种 Codec 函数 —— 例如使用 `getStructCodec` 创建对象或使用 `getOptionCodec` 创建可选数据 —— 我们可以设计一个 Codec 对象来描述 `Mint` 账户的字节布局。这是一个说明该情况的例子。请注意，为了这个例子，`Mint` 账户的布局被稍微简化了。
 
 ```ts twoslash
 import { Rpc, SolanaRpcApi } from "@solana/kit";
@@ -130,11 +130,11 @@ decodedData satisfies {
 };
 ```
 
-## Decode using program clients
+## 使用程序客户端解码
 
-Fortunately for us, we often don't need to manually create these Codec objects as program clients will provide them for us. These helpers are typically [generated via Codama IDLs](https://github.com/codama-idl/codama) and follow the `getXCodec` naming convention where `X` is the name of the account.
+幸运的是，我们通常不需要手动创建这些 Codec 对象，因为程序客户端会为我们提供它们。这些助手函数通常是[通过 Codama IDL 生成的](https://github.com/codama-idl/codama)，并遵循 `getXCodec` 命名约定，其中 `X` 是账户的名称。
 
-For instance, here's how we can access the `Mint` codec from the `@solana-program/token` library.
+例如，我们可以从 `@solana-program/token` 库访问 `Mint` codec，如下所示。
 
 ```ts twoslash
 import { Rpc, SolanaRpcApi } from "@solana/kit";
@@ -151,7 +151,7 @@ const decodedData = mintCodec.decode(account.data);
 decodedData satisfies Mint;
 ```
 
-This can be simplified even further by using the `decodeX` helpers from program clients. These helpers accept an `EncodedAccount` or a `MaybeEncodedAccount` and return an `Account<T>` or a `MaybeAccount<T>` respectively, where `T` is the type of the account data.
+通过使用程序客户端的 `decodeX` 助手函数，可以进一步简化此过程。这些助手函数接受一个 `EncodedAccount` 或一个 `MaybeEncodedAccount`，并分别返回一个 `Account<T>` 或一个 `MaybeAccount<T>`，其中 `T` 是账户数据的类型。
 
 ```ts twoslash
 import { Rpc, SolanaRpcApi } from "@solana/kit";
@@ -165,11 +165,11 @@ assertAccountExists(account);
 account satisfies Account<Mint>;
 ```
 
-## Fetch and decode using program clients
+## 使用程序客户端获取和解码
 
-Last but not least, it is possible to fetch and decode an account in a single step using the `fetchX` helpers from program clients. These helpers accept an `Rpc` object and an `Address` and return an `Account<T>` where `T` is the type of the account data. These helpers will also assert the existence of the account and throw an error if it does not exist.
+最后但并非最不重要的一点是，可以使用程序客户端的 `fetchX` 助手函数一步完成账户的获取和解码。这些助手函数接受一个 `Rpc` 对象和一个 `Address`，并返回一个 `Account<T>`，其中 `T` 是账户数据的类型。这些助手函数还将断言账户的存在，如果账户不存在，则抛出错误。
 
-This means, everything we've been doing so far can be simplified into a single line of code.
+这意味着，到目前为止我们所做的一切都可以简化为一行代码。
 
 ```ts twoslash
 import { Rpc, SolanaRpcApi } from "@solana/kit";
@@ -182,11 +182,11 @@ const account = await fetchMint(rpc, address("1234..5678"));
 account satisfies Account<Mint>;
 ```
 
-## Update `index.ts`
+## 更新 `index.ts`
 
-Now that we know how to fetch and decode on-chain accounts, let's update our main `tutorial` function to fetch the `Mint` account we created in the previous article and display its decoded data.
+现在我们知道了如何获取和解码链上账户，让我们更新我们的主 `tutorial` 函数来获取我们在上一篇文章中创建的 `Mint` 账户并显示其解码后的数据。
 
-Since some of its data is optional, we'll use the `unwrapOption` helper to convert `Option<T>` types into `T | null` before displaying them.
+由于它的一些数据是可选的，我们将使用 `unwrapOption` 助手函数将 `Option<T>` 类型转换为 `T | null`，然后再显示它们。
 
 ```ts twoslash title="src/index.ts"
 // @filename: client.ts
@@ -236,7 +236,7 @@ async function tutorial() {
 }
 ```
 
-You should now see the following output when you run the `start` script:
+现在，当您运行 `start` 脚本时，您应该会看到以下输出：
 
 ```
 Mint created: 4txHAwAuUDJAdzuNnfaL88kj4hF7wa3U3kak91r4keju.
@@ -246,14 +246,14 @@ Mint decimals: 2.
 Mint supply: 0.
 ```
 
-## Next steps
+## 下一步
 
-Congrats on completing this tutorial! You've learned how to get started with the Kit library by:
+恭喜您完成本教程！您已经学习了如何通过以下方式开始使用 Kit 库：
 
-- Creating a `Client` object containing all the bits from Kit that matter for your application — ensuring the rest can be tree-shaken away.
-- Building instructions and transaction messages.
-- Generating signer objects and using them to sign transactions.
-- Sending transactions and waiting for them to be confirmed.
-- Fetching and decoding on-chain accounts that were created by your transactions.
+- 创建一个包含 Kit 中所有相关位的 `Client` 对象，以用于您的应用程序 —— 确保其余部分可以被 tree-shaken 掉。
+- 构建指令和交易消息。
+- 生成签名者对象并使用它们来签署交易。
+- 发送交易并等待它们被确认。
+- 获取和解码由您的交易创建的链上账户。
 
-If you'd like to dig deeper into the Kit library, you may be interested in the [Core concepts](/docs/concepts) section of the documentation. There, you'll find in-depth articles about specific parts of the library such as [Codecs](/docs/concepts/codecs), [Signers](/docs/concepts/signers), and [RPCs](/docs/concepts/rpc).
+如果您想更深入地了解 Kit 库，您可能会对文档的[核心概念](/docs/concepts)部分感兴趣。在那里，您将找到关于库的特定部分的深入文章，例如 [Codecs](/docs/concepts/codecs)、[Signers](/docs/concepts/signers) 和 [RPCs](/docs/concepts/rpc)。
