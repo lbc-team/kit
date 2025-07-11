@@ -61,7 +61,7 @@ export async function generateMetadata(props: { params: Promise<{ slug?: string[
     if (!page) notFound();
 
     return {
-        title: page.data.title,
+        title: page.data.title + " - kit中文文档",
         description: page.data.description,
     };
 }

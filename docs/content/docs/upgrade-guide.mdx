@@ -21,7 +21,7 @@ Kit（之前称为 Web3.js v2）是对 [Web3.js 库](https://github.com/solana-l
 
 为了避免这种情况，**Kit 不包含像 `Connection` 这样的单一入口点类**。相反，它提供了一组函数，你可以根据需要导入和使用。两个关键函数替代了 `Connection` 类的大部分功能：`createSolanaRpc` 和 `createSolanaRpcSubscriptions`。
 
-前者 `createSolanaRpc` 返回一个 `Rpc` 对象，用于向指定的 endpoint 发出 RPC 请求。[在此阅读更多关于 RPC 的信息](/docs/concepts/rpc)。
+前者 `createSolanaRpc` 返回一个 `Rpc` 对象，用于向指定的 endpoint 发出 RPC 请求。[在此阅读更多关于 RPC 的信息](/docs/kit/docs/kit/docs/kit/docs/kit/docs/concepts/rpc)。
 
 <Spread>
 <div className="2xl:flex 2xl:*:flex-1 2xl:items-start 2xl:gap-4">
@@ -53,7 +53,7 @@ const { value: balance } = await rpc.getBalance(wallet).send();
 </div>
 </Spread>
 
-后者 `createSolanaRpcSubscriptions` 返回一个 `RpcSubscriptions` 对象，它允许你订阅 Solana 网络上的事件。[在此阅读更多关于 RPC 订阅的信息](/docs/concepts/rpc-subscriptions)。
+后者 `createSolanaRpcSubscriptions` 返回一个 `RpcSubscriptions` 对象，它允许你订阅 Solana 网络上的事件。[在此阅读更多关于 RPC 订阅的信息](/docs/kit/docs/kit/docs/kit/docs/kit/docs/concepts/rpc-subscriptions)。
 
 <Spread>
 <div className="2xl:flex 2xl:*:flex-1 2xl:items-start 2xl:gap-4">
@@ -184,7 +184,7 @@ const bytes = personCodec.encode({
 });
 ```
 
-[你可以在这里阅读更多关于 codecs 的信息](/docs/concepts/codecs)。
+[你可以在这里阅读更多关于 codecs 的信息](/docs/kit/docs/kit/docs/kit/docs/kit/docs/concepts/codecs)。
 
 一旦你有了账户数据的 codec，你就可以使用 `decodeAccount` 函数将编码的账户转换为解码的账户。
 
@@ -242,7 +242,7 @@ const rpc = createSolanaRpc("https://api.devnet.solana.com");
 const account: Account<Nonce> = await fetchNonce(rpc, address("1234..5678"));
 ```
 
-[查看“兼容客户端”页面](/docs/compatible-clients)以获取与 Kit 兼容的可用程序库的列表。
+[查看“兼容客户端”页面](/docs/kit/docs/kit/docs/kit/docs/kit/docs/compatible-clients)以获取与 Kit 兼容的可用程序库的列表。
 
 ## 创建指令
 
@@ -442,7 +442,7 @@ const transactionMessage = pipe(
 const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
 ```
 
-[在此阅读更多关于 signer 的信息](/docs/concepts/signers)。
+[在此阅读更多关于 signer 的信息](/docs/kit/docs/kit/docs/kit/docs/kit/docs/concepts/signers)。
 
 ## 发送和确认交易
 

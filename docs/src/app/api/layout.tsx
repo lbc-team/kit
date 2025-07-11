@@ -6,10 +6,6 @@ import { apiSource } from '@/lib/source';
 export default function Layout({ children }: { children: ReactNode }) {
     return (
         <DocsLayout
-            // tree={{
-            //     ...apiSource.pageTree,
-            //     children: apiSource.pageTree.children.filter(node => node.type !== 'page' || node.url !== '/api'),
-            // }}
             tree={apiSource.pageTree}
             {...baseOptions}
         >

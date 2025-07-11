@@ -18,9 +18,9 @@ def translate_markdownx(content):
     return None
 
 def translate_docs_directory():
-    docs_path = Path("../content/docs")
+    docs_path = Path("../content/api")
     if not docs_path.exists():
-        print("错误: @content/docs 目录不存在")
+        print("错误: ../content/api 目录不存在")
         return
 
     # 遍历所有文件

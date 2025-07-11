@@ -49,7 +49,7 @@ export async function generateMetadata(props: { params: Promise<{ slug?: string[
     if (!page) notFound();
 
     return {
-        title: page.data.title,
+        title: page.data.title + " - kit api接口",
         description: page.data.description,
     };
 }

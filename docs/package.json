@@ -4,11 +4,14 @@
     "private": true,
     "scripts": {
         "build": "next build",
+        "build:static": "next build",
+        "export": "next build && node fix-relative-paths.js && node fix-api-links.js",
         "dev": "next dev --turbo",
         "start": "next start",
         "postinstall": "fumadocs-mdx",
         "prebuild": "./build-api-docs.sh",
-        "predev": "./build-api-docs.sh"
+        "predev": "./build-api-docs.sh",
+        "pre-export": "./build-api-docs.sh"
     },
     "dependencies": {
         "@solana-program/compute-budget": "^0.7.0",
