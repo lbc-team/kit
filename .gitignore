@@ -27,3 +27,4 @@ test-ledger/
 
 # ignore JetBrains IDE
 .idea
+docs/scripts/myenv
